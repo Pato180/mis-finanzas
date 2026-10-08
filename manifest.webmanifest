@@ -1,4 +1,5 @@
 {
+  "id": "./",
   "name": "Mis Finanzas",
   "short_name": "Mis Finanzas",
   "description": "Aplicación personal para organizar ingresos, gastos, ahorros y metas financieras.",
@@ -7,7 +8,7 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#6c63ff",
+  "theme_color": "#4F46E5",
   "icons": [
     {
       "src": "icons/icon-192.png",
