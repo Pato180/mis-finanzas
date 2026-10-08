@@ -103,6 +103,10 @@ body.locked header,body.locked main,body.locked nav,body.locked #toast{visibilit
 <div id="exM"><label for="exMs">Mes y año</label><input id="exMs" type="month"><label for="exF">Estilo</label><select id="exF"><option value="banco">Estado de cuenta (como el banco)</option><option value="libro">Libro contable por meses</option></select></div>
 <div id="exY" hidden><label for="exYs">Año</label><select id="exYs"></select><small>El año se descarga como libro contable: cada mes con su saldo del mes pasado, sus movimientos, la sumatoria y el total.</small></div>
 <div class="bt"><button type="button" class="btn sec" data-x>Cancelar</button><button type="button" class="btn" id="exGo">Descargar</button></div></form></dialog>
+<dialog id="dWl"><form onsubmit="return false"><img class="mascota" alt="" width="96" height="96" style="display:block;margin:0 auto 8px"><h2>¡Te damos la bienvenida!</h2><small>Tu control de dinero, simple y guardado en tu celular.</small>
+<div class="bt" style="flex-direction:column"><button type="button" class="btn" id="wlNew">¿Eres nuevo usuario?</button><button type="button" class="btn sec" id="wlOld">Ya lo he utilizado antes</button></div></form></dialog>
+<dialog id="dRs"><form onsubmit="return false"><h2>Recupera tu perfil</h2><small>Sube el archivo de respaldo que descargaste antes desde la app, en <b>Perfil → Descargar respaldo</b>. Se llama algo como <b>respaldo_mis_finanzas_2026-10-08.json</b> y normalmente está en tus Descargas.</small><small>Al subirlo se carga todo solo: tu perfil, movimientos, fijos, metas, activos y pasivos, categorías y configuración.</small>
+<input type="file" id="rsF" accept=".json,application/json" hidden><div class="bt" style="flex-direction:column"><button type="button" class="btn" id="rsUp">Subir mi respaldo</button><button type="button" class="btn sec" id="rsBk">Atrás</button></div><p id="rsE" role="alert" style="color:#cf3a55;margin:8px 0 0"></p></form></dialog>
 <dialog id="dNp"><form onsubmit="return false"><h2 id="npT"></h2><small>Cada perfil entra con su propio PIN.</small><label for="npP">PIN de 4 números</label><input id="npP" type="password" inputmode="numeric" maxlength="4" autocomplete="off"><label for="npP2">Confirma tu PIN</label><input id="npP2" type="password" inputmode="numeric" maxlength="4" autocomplete="off"><div class="bt"><button type="button" class="btn" id="npGo">Guardar y entrar</button></div></form></dialog>
 <dialog id="dLk"><form onsubmit="return false"><img class="mascota" alt="" width="96" height="96" style="display:block;margin:0 auto 8px"><h2>Ingresa con tu PIN 🔒</h2><div id="lkPw"><label for="lkP">Entra con tu PIN</label><input id="lkP" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></div><button type="button" class="btn sec" id="lkB" style="width:100%;margin-top:12px" hidden>👆 Entrar con huella o rostro</button><small id="lkE" class="out"></small><div class="bt"><button type="button" class="btn" id="lkGo">Desbloquear</button></div><div class="bt"><button type="button" class="lnk" id="lkNew">Crear nuevo perfil</button></div><div class="bt"><button type="button" class="lnk" id="lkF" style="color:var(--out)">Olvidé mi PIN (borra todos los perfiles de este celular)</button></div></form></dialog>
 <dialog id="dOb"><form id="fOb"><img class="mascota" alt="" width="96" height="96" style="display:block;margin:0 auto 8px"><h2>Te damos la bienvenida a tu control de dinero</h2><small id="obSt"></small>
@@ -266,7 +270,7 @@ if(wb){if(bioTaken())toast('La huella o el rostro ya está asociada a otro perfi
 $('obGo').onclick=obDone;$('obNx').onclick=obNext;$('obBk').onclick=()=>obShow(1);$('fOb').onsubmit=e=>{e.preventDefault();$('ob1').hidden?obDone():obNext()};$('fOb').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();$('ob1').hidden?obDone():obNext()}});
 function dl(n,t,ty){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:ty+';charset=utf-8'}));a.download=n;document.body.appendChild(a);a.click();a.remove()}
 const csvOld=()=>{const q=v=>'"'+String(v).replace(/"/g,'""')+'"',T={income:'Ingreso',expense:'Egreso',save:'Ahorro'};dl('estado_de_cuenta.csv','\ufeffFecha;Tipo;Categoría;Motivo;Monto\n'+S.tx.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(x=>[x.date,T[x.type],q(x.category),q(x.description),String(x.amount).replace('.',',')].join(';')).join('\n'),'text/csv')};
-$('bkDl').onclick=()=>dl('respaldo_mis_finanzas_'+ymd(new Date())+'.json',JSON.stringify({v:1,profile:S.profile,tx:S.tx,rec:S.rec,goals:S.goals,motifs:S.motifs,assets:S.assets,liabs:S.liabs,cats:S.cats}),'application/json');
+$('bkDl').onclick=()=>dl('respaldo_mis_finanzas_'+ymd(new Date())+'.json',JSON.stringify({v:1,profile:S.profile,tx:S.tx,rec:S.rec,goals:S.goals,motifs:S.motifs,assets:S.assets,liabs:S.liabs,cats:S.cats,pin:gp()}),'application/json');
 $('bkUp').onclick=()=>$('bkFile').click();
 $('bkFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{let d;try{d=JSON.parse(rd.result);if(!d.profile||!Array.isArray(d.tx))throw 0}catch(x){return alert('Ese archivo no es un respaldo válido')}
 const old=JSON.stringify({profile:S.profile,tx:S.tx,rec:S.rec,goals:S.goals,motifs:S.motifs,assets:S.assets,liabs:S.liabs,cats:S.cats});S.profile=normP(d.profile);S.profile.id=PID;S.tx=d.tx;S.rec=d.rec||[];S.goals=d.goals||[];S.motifs=d.motifs||S.motifs;S.assets=d.assets||[];S.liabs=d.liabs||[];S.cats=d.cats||[];migCat();save();$('dPf').close();render();toast('Respaldo restaurado','Deshacer',()=>{Object.assign(S,JSON.parse(old));save();render()})};rd.readAsText(f);e.target.value=''};
@@ -275,12 +279,12 @@ const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))),ub=x=>Uint8Array.fr
 async function enableBio(){try{if(!window.PublicKeyCredential)throw 0;const c=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Mis finanzas'},user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'usuario',displayName:'Usuario'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000}});regUpd(PID,p=>{p.bio=b64(c.rawId)});return true}catch(e){return false}}
 async function bioUnlock(){try{const p=regLoad().find(x=>x.bio);if(!p)throw 0;await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),allowCredentials:[{type:'public-key',id:ub(p.bio),transports:['internal']}],userVerification:'required',timeout:60000}});enter(p.id)}catch(e){$('lkE').textContent='No se pudo verificar tu huella o rostro'}}
 function hideData(){PID=null;setPid(null);S.profile=null;S.tx=[];S.rec=[];S.goals=[];S.assets=[];S.liabs=[];S.cats=[];S.motifs=DM.slice();document.body.classList.add('locked');render0();['hi','bal','sIn','sOut','sSv'].forEach(i=>{const e=$(i);if(e)e.textContent=''});Object.values(CH).forEach(c=>{try{c.destroy()}catch(e){}});CH={}}
-function lock(){document.querySelectorAll('dialog[open]').forEach(d=>{if(d.id!=='dLk')d.close()});hideData();const r=regLoad();if(!r.length)return startNew();const np=r.find(p=>!p.pin);if(np)return needPin(np);
+function lock(){document.querySelectorAll('dialog[open]').forEach(d=>{if(d.id!=='dLk')d.close()});hideData();const r=regLoad();if(!r.length)return welcome();const np=r.find(p=>!p.pin);if(np)return needPin(np);
 $('lkP').value='';$('lkE').textContent='';$('lkPw').hidden=false;$('lkB').hidden=!r.some(p=>p.bio);if(!$('dLk').open)$('dLk').showModal();$('lkP').focus()}
 function enter(id){setPid(id);S.profile=ld(K.profile,null);S.tx=ld(K.tx,[]);S.rec=ld(K.rec,[]);S.goals=ld(K.goals,[]);S.motifs=ld(K.motifs,DM.slice());S.assets=ld(K.assets,[]);S.liabs=ld(K.liabs,[]);S.cats=ld(K.cats,[]);
 if(!S.profile)S.profile={username:(regFind(id)||{}).name||'Perfil',initialBalance:0,occ:'estudiante',salary:0};normP(S.profile);S.profile.id=id;migCat();
 if($('dLk').open)$('dLk').close();document.body.classList.remove('locked');const h=document.querySelector('nav [data-go=home]');if(h)h.click();autoPost();applyFixed();render();save()}
-function startNew(){if($('dLk').open)$('dLk').close();hideData();['obN','obPn','obAg','obB','obG','obT','obS','obP','obP2'].forEach(x=>$(x).value='');$('obBio').checked=false;$('obGe').value='no';$('obCs').value='cercano';$('obO').value='estudiante';$('obO').onchange();obShow(1);$('obCa').hidden=!regLoad().length;if(!$('dOb').open)$('dOb').showModal()}
+function startNew(){if($('dLk').open)$('dLk').close();hideData();['obN','obPn','obAg','obB','obG','obT','obS','obP','obP2'].forEach(x=>$(x).value='');$('obBio').checked=false;$('obGe').value='no';$('obCs').value='cercano';$('obO').value='estudiante';$('obO').onchange();obShow(1);$('obCa').textContent=regLoad().length?'Cancelar':'Atrás';$('obCa').hidden=false;if(!$('dOb').open)$('dOb').showModal()}
 let npId=null;function needPin(p){npId=p.id;$('npT').textContent='Crea un PIN para «'+p.name+'»';$('npP').value=$('npP2').value='';if(!$('dNp').open)$('dNp').showModal()}
 $('dNp').addEventListener('cancel',e=>e.preventDefault());$('dOb').addEventListener('cancel',e=>e.preventDefault());
 $('npGo').onclick=async()=>{const a=$('npP').value;if(!pinOk(a))return alert('El PIN debe tener 4 números');if(a!==$('npP2').value)return alert('La confirmación del PIN no coincide');if(await pinTaken(a,npId))return alert('Ese PIN ya está en uso por otro perfil. Elige uno distinto.');const h=await hash(a),id=npId;regUpd(id,p=>{p.pin=h});npId=null;$('dNp').close();enter(id)};
@@ -329,6 +333,22 @@ if(f){const d=$('txD').value;$('txDh').textContent=d?($('txF').value==='monthly'
 function fxTxt(r){if(r.id==='salary')return'Sueldo · se registra solo cada mes';const t=r.start||'';if(!t)return'Fijo';return r.frequency==='weekly'?'Cada '+WD[new Date(+t.slice(0,4),+t.slice(5,7)-1,+t.slice(8)).getDay()]+' · desde '+t.slice(8)+'/'+t.slice(5,7):'Cada mes el día '+(+t.slice(8))}
 function migRec(){S.rec.forEach(r=>{if(r.id==='salary'||r.start)return;const l=S.tx.filter(x=>x.fixed&&x.type===r.type&&x.description===r.description).map(x=>x.date).sort().pop();r.start=l||ymd(new Date());r.last=l||null;delete r.applied})}
 $('txK').onchange=$('txF').onchange=$('txD').onchange=fx;$('navPf').onclick=()=>$('prof').click();
+
+// ===== Bienvenida: perfil nuevo o recuperar un respaldo (se crea un perfil nuevo con TODOS los datos del respaldo)
+function welcome(){document.querySelectorAll('dialog[open]').forEach(d=>{if(d.id!=='dWl')d.close()});hideData();if(!$('dWl').open)$('dWl').showModal()}
+async function importBackup(f){const E=m=>{$('rsE').textContent=m};E('');let d;try{d=JSON.parse(await f.text())}catch(x){return E('No pude leer ese archivo. Sube el respaldo .json que descargaste desde la app.')}
+if(!d||typeof d!=='object'||!d.profile||typeof d.profile!=='object'||!Array.isArray(d.tx))return E('Ese archivo no es un respaldo de Mis Finanzas. Busca el que se llama "respaldo_mis_finanzas_…json".');
+const tx=d.tx.filter(x=>x&&x.date&&['income','expense','save'].includes(x.type)&&Number.isFinite(+x.amount)),id=newId(),P=normP(Object.assign({},d.profile,{id})),pin=typeof d.pin==='string'&&d.pin&&!regLoad().some(p=>p.pin===d.pin)?d.pin:null,r=regLoad(),A=v=>Array.isArray(v)?v:[];
+r.push({id,name:String(P.username||'Perfil'),pin,bio:null});regSave(r);
+lsSet(pk(id,'profile'),JSON.stringify(P));lsSet(pk(id,'tx'),JSON.stringify(tx));lsSet(pk(id,'rec'),JSON.stringify(A(d.rec)));lsSet(pk(id,'goals'),JSON.stringify(A(d.goals)));lsSet(pk(id,'motifs'),JSON.stringify(A(d.motifs).length?d.motifs:DM));lsSet(pk(id,'assets'),JSON.stringify(A(d.assets)));lsSet(pk(id,'liabs'),JSON.stringify(A(d.liabs)));lsSet(pk(id,'cats'),JSON.stringify(A(d.cats)));
+if(lsGet(pk(id,'tx'))===null){regSave(regLoad().filter(p=>p.id!==id));return E('No hay espacio suficiente en este dispositivo para cargar el respaldo.')}
+$('dRs').close();if(pin)enter(id);else needPin(regFind(id))}
+$('dWl').addEventListener('cancel',e=>e.preventDefault());$('dRs').addEventListener('cancel',e=>e.preventDefault());
+$('wlNew').onclick=()=>{$('dWl').close();startNew()};
+$('wlOld').onclick=()=>{$('rsE').textContent='';$('dWl').close();$('dRs').showModal()};
+$('rsBk').onclick=()=>{$('dRs').close();$('dWl').showModal()};
+$('rsUp').onclick=()=>$('rsF').click();
+$('rsF').onchange=async e=>{const f=e.target.files[0];if(f)await importBackup(f);e.target.value=''};
 // ===== Reportes Excel/PDF. Única fuente: S.tx/S.goals/S.assets/S.liabs del perfil activo y la misma fórmula de saldo que bal() (ahorro SÍ resta del disponible).
 const AK=['Cuenta bancaria','Inversión','Bien (vehículo, inmueble…)','Otro activo'],LK=['Deuda','Préstamo','Tarjeta de crédito','Otra obligación'],CDN='https://cdnjs.cloudflare.com/ajax/libs/',
 nf=new Intl.NumberFormat('es-EC',{minimumFractionDigits:2,maximumFractionDigits:2}),
@@ -429,16 +449,5 @@ $('apAdd').onclick=()=>{const n=$('apN').value.trim(),v=+$('apM').value;if(!n||!
 $('apL').onclick=e=>{const id=e.target.dataset.id;if(!id)return;if(e.target.dataset.k==='a')S.assets=S.assets.filter(x=>x.id!==id);else S.liabs=S.liabs.filter(x=>x.id!==id);save();apList()};
 
 lock();
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      const registration = await navigator.serviceWorker.register('./sw.js', {
-        scope: './'
-      });
-      console.log('Mis Finanzas: Service Worker registrado correctamente.', registration.scope);
-    } catch (error) {
-      console.error('Mis Finanzas: no se pudo registrar el Service Worker.', error);
-    }
-  });
-}
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script></body></html>
