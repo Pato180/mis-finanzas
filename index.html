@@ -141,9 +141,33 @@ esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'
 MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],PAL=['#CF3A55','#3452D1','#E0A100','#7B4FD0','#0A8862','#F07C2B','#64748B','#C2409B'],
 CI=['Sueldo','Mesada','Ventas','Otros ingresos'],CO=['Alimentación','Transporte','Servicios','Vivienda','Salud','Educación','Gustos','Otros'],
 K={profile:null,tx:null,rec:null,goals:null,motifs:null},LEG={profile:'ahorroApp_userProfile',tx:'ahorroApp_transactions',rec:'ahorroApp_recurring',goals:'ahorroApp_goals',motifs:'ahorroApp_motifs'};
-let S={profile:null,tx:[],rec:[],goals:[],motifs:[],assets:[],liabs:[],cats:[],per:'month',flt:'all'},CH={},eid=null,tt='expense',rt='income',tm;
+let S={profile:null,tx:[],rec:[],goals:[],motifs:[],assets:[],liabs:[],cats:[],per:'month',flt:'all'},CH={},eid=null,tt='expense',rt='income',tm,saveFailed=false;
 const ld=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch(e){return d}},
-save=()=>{if(!PID)return;try{for(const k in K)localStorage.setItem(K[k],JSON.stringify(S[k]))}catch(e){}},
+save=()=>{
+if(!PID)return false;
+const entries=[];
+try{
+  // Preparar todos los datos antes de escribir evita fallos de serialización a mitad del guardado.
+  for(const k of TB){const key=K[k];if(!key)throw new Error('No se encontró la clave de almacenamiento del perfil activo.');entries.push({key,value:JSON.stringify(S[k])})}
+  const previous=entries.map(x=>({key:x.key,value:localStorage.getItem(x.key)}));
+  let written=0;
+  try{for(const x of entries){localStorage.setItem(x.key,x.value);written++}}
+  catch(err){
+    // localStorage no ofrece transacciones: intentar restaurar las claves ya escritas.
+    for(let i=written-1;i>=0;i--){try{const p=previous[i];if(p.value===null)localStorage.removeItem(p.key);else localStorage.setItem(p.key,p.value)}catch(rollbackError){}}
+    throw err;
+  }
+  saveFailed=false;
+  return true;
+}catch(err){
+  saveFailed=true;
+  const msg=(err&&err.name==='QuotaExceededError')
+    ?'No se pudieron guardar los cambios: el almacenamiento del dispositivo está lleno. Exporta un respaldo y libera espacio antes de continuar.'
+    :'No se pudieron guardar los cambios en este dispositivo. Revisa el espacio disponible y los permisos del navegador; exporta un respaldo si todavía puedes acceder a tus datos.';
+  // Mostrar el aviso después de los mensajes de éxito que puedan lanzar los formularios.
+  setTimeout(()=>toast('⚠️ '+msg),0);
+  return false;
+}},
 sum=(l,t)=>l.filter(x=>x.type===t).reduce((a,x)=>a+x.amount,0),mo=r=>r.frequency==='weekly'?r.amount*4.33:r.amount,
 bal=()=>S.profile.initialBalance+sum(S.tx,'income')-sum(S.tx,'expense')-sum(S.tx,'save'),
 inP=d=>S.per==='all'||(S.per==='month'?d.slice(0,7)===ymd(new Date()).slice(0,7):ymd(wk(new Date(d+'T00:00')))===ymd(wk(new Date()))),
@@ -151,7 +175,7 @@ addMot=v=>{S.motifs=S.motifs.filter(x=>x!==v);S.motifs.push(v)};
 // ===== Multi-perfil: registro local {id interno, nombre, hash del PIN, huella}. Los datos de cada perfil viven bajo ahorroApp_p_<id>_<tabla>; K apunta al perfil activo.
 const PR_K='ahorroApp_profiles',TB=['profile','tx','rec','goals','motifs','assets','liabs','cats'],DM=['Almuerzo','Pasaje','Servicios básicos','Mesada'];
 let PID=null;
-const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},lsDel=k=>{try{localStorage.removeItem(k)}catch(e){}},
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}},lsDel=k=>{try{localStorage.removeItem(k);return true}catch(e){return false}},
 regLoad=()=>{const r=ld(PR_K,[]);return Array.isArray(r)?r:[]},regSave=r=>lsSet(PR_K,JSON.stringify(r)),
 regFind=id=>regLoad().find(p=>p.id===id),regUpd=(id,f)=>{const r=regLoad(),p=r.find(x=>x.id===id);if(p){f(p);regSave(r)}},
 pk=(id,t)=>'ahorroApp_p_'+id+'_'+t,setPid=id=>{PID=id;TB.forEach(t=>{K[t]=id?pk(id,t):null})},
