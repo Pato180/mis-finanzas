@@ -429,5 +429,16 @@ $('apAdd').onclick=()=>{const n=$('apN').value.trim(),v=+$('apM').value;if(!n||!
 $('apL').onclick=e=>{const id=e.target.dataset.id;if(!id)return;if(e.target.dataset.k==='a')S.assets=S.assets.filter(x=>x.id!==id);else S.liabs=S.liabs.filter(x=>x.id!==id);save();apList()};
 
 lock();
-if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('./sw.js', {
+        scope: './'
+      });
+      console.log('Mis Finanzas: Service Worker registrado correctamente.', registration.scope);
+    } catch (error) {
+      console.error('Mis Finanzas: no se pudo registrar el Service Worker.', error);
+    }
+  });
+}
 </script></body></html>
