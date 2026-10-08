@@ -1,11 +1,19 @@
-const CACHE_NAME = 'mis-finanzas-v2';
+const CACHE_NAME = 'mis-finanzas-v3';
 
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icons/icon-192.png'
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
+
+const EXTERNAL_HOSTS = new Set([
+  'cdn.jsdelivr.net',
+  'cdnjs.cloudflare.com',
+  'fonts.googleapis.com',
+  'fonts.gstatic.com'
+]);
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -33,19 +41,24 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
+  const isSameOrigin = url.origin === self.location.origin;
+  const isExternalAllowed = EXTERNAL_HOSTS.has(url.hostname);
 
-  // Los recursos externos (CDN, Google Fonts, etc.) se resuelven
-  // normalmente. Si están disponibles, no interferimos con ellos.
-  if (url.origin !== self.location.origin) return;
+  // No interceptamos otros dominios externos.
+  if (!isSameOrigin && !isExternalAllowed) return;
 
-  // Para la navegación, intenta primero la versión de red para
-  // recibir actualizaciones; si no hay conexión, usa la caché.
-  if (request.mode === 'navigate') {
+  // Navegación: red primero para obtener la versión más reciente;
+  // caché como respaldo cuando no hay conexión.
+  if (isSameOrigin && request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
         .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put('./index.html', copy);
+            });
+          }
           return response;
         })
         .catch(() => caches.match('./index.html'))
@@ -53,13 +66,19 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Para archivos locales: caché primero y red como respaldo.
+  // Recursos locales y CDN: caché primero; si no existe, red.
+  // Los recursos externos permitidos quedan disponibles para uso offline
+  // después de haber sido cargados al menos una vez con conexión.
   event.respondWith(
     caches.match(request).then(cached => {
-      return cached || fetch(request).then(response => {
-        if (response.ok) {
+      if (cached) return cached;
+
+      return fetch(request).then(response => {
+        if (response.ok || response.type === 'opaque') {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(request, copy);
+          });
         }
         return response;
       });
