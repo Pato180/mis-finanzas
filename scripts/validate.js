@@ -58,7 +58,7 @@ if (!/<link\s+rel=["']manifest["']\s+href=["']manifest\.webmanifest["']/i.test(h
   fail('index.html no enlaza manifest.webmanifest.');
 }
 
-if (!/serviceWorker\.register\(['"]\.\/?sw\.js['"]\)/.test(html)) {
+if (!/serviceWorker\.register\(\s*['"](?:\.\/)?sw\.js['"]\s*\)/.test(html)) {
   fail('index.html no registra el service worker sw.js.');
 }
 
