@@ -90,8 +90,8 @@ if (scriptBlocks.length === 0) {
 }
 
 const coachRequirements = [
-  [/function coachData\\(\\)/, 'index.html debe calcular los datos base del coach en una sola función.'],
-  [/function tips\\(pl,i,o\\)/, 'index.html debe incluir el evaluador de reglas del coach.'],
+  [/function coachData\(\)/, 'index.html debe calcular los datos base del coach en una sola función.'],
+  [/function tips\(pl,i,o\)/, 'index.html debe incluir el evaluador de reglas del coach.'],
   [/id=["']obIf["']/, 'El alta inicial debe preguntar la frecuencia de ingreso.'],
   [/id=["']pfIf["']/, 'El perfil debe permitir editar la frecuencia de ingreso.'],
   [/incomeFrequency/, 'La frecuencia de ingreso debe guardarse en el perfil.'],
