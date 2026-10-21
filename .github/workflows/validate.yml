@@ -22,4 +22,4 @@ jobs:
         with:
           node-version: 20
       - name: Validate project files
-        run: node scripts/validate.js
+        run: node scripts/validate.js && node scripts/financial-tests.js
