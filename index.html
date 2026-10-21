@@ -20,7 +20,7 @@ h1{font-size:22px}h2{font-size:17px;margin-bottom:8px}h3{font-size:13px;color:va
 .trio{display:flex;gap:30px;flex-wrap:wrap}.trio b{display:block;font-size:18px}
 .blk{background:var(--card);border-radius:14px;padding:18px;margin-top:16px}
 .ch{position:relative;height:220px}
-.tip{padding:2px 0 2px 12px;border-left:3px solid var(--line);margin-top:12px}.tip.w{border-color:var(--out)}.tip.g{border-color:var(--in)}
+.income-pending{display:block;margin-top:5px;color:var(--mut);font-size:12px}.tip{padding:2px 0 2px 12px;border-left:3px solid var(--line);margin-top:12px}.tip.w{border-color:var(--out)}.tip.g{border-color:var(--in)}
 .btn{background:var(--ink);color:#fff;padding:11px 18px;border-radius:12px;font-weight:600}.btn.sec{background:#E4ECE9;color:var(--ink)}
 .lnk{color:var(--sv);font-weight:600;padding:2px}.empty{color:var(--mut);padding:14px 0}
 input,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
@@ -89,7 +89,7 @@ body.locked header,body.locked main,body.locked nav,body.locked #toast{visibilit
 <main>
 <section class="tab on" id="t-home">
 <div class="hero"><div class="top"><small>Disponible ahora</small><select id="per" aria-label="Periodo"><option value="month">Este mes</option><option value="week">Esta semana</option><option value="all">Todo</option></select></div>
-<div class="big num" id="bal"></div>
+<div class="big num" id="bal"></div><small id="coachIncome" class="income-pending" hidden></small>
 <div class="trio"><div><small>Ingresos</small><b class="in" id="sIn"></b></div><div><small>Egresos</small><b class="out" id="sOut"></b></div><div><small>Ahorrado en total</small><b class="sv" id="sSv"></b></div></div></div>
 <div class="blk"><h2>Tu coach</h2><div id="tips"></div></div>
 <div class="blk"><div class="hd"><h2>Presupuestos del mes</h2><button type="button" class="btn sec" id="newBudget">+ Crear</button></div><small>Controla cuánto quieres gastar por categoría. Los avisos no bloquean tus gastos.</small><div id="budgetList"></div><p class="note warn">⚠️ El cálculo usa solo los gastos que has registrado en la app durante el mes actual. No descuenta automáticamente movimientos que todavía no hayas registrado.</p></div>
@@ -134,13 +134,14 @@ body.locked header,body.locked main,body.locked nav,body.locked #toast{visibilit
 <label for="obPn">Nombre preferido</label><input id="obPn" autocomplete="off" placeholder="¿Cómo quieres que te llame tu coach?">
 <div class="g2"><div><label for="obAg">Edad</label><input id="obAg" type="number" inputmode="numeric" min="10" max="120" step="1"></div><div><label for="obGe">Género</label><select id="obGe"><option value="mujer">Mujer</option><option value="hombre">Hombre</option><option value="otro">Otro</option><option value="no" selected>Prefiero no indicarlo</option></select></div></div>
 <label for="obO">¿A qué te dedicas?</label><select id="obO"><option value="estudiante">Estudio</option><option value="trabaja">Trabajo</option><option value="ambos">Trabajo y estudio</option><option value="independiente">Trabajo por cuenta propia</option><option value="otro">Otra situación</option></select><div id="obW" hidden><label for="obS">Sueldo mensual ($)</label><input id="obS" type="number" step="0.01" min="0"></div>
+<label for="obIf">¿Cada cuánto recibes dinero?</label><select id="obIf"><option value="semanal">Cada semana</option><option value="mensual">Cada mes</option><option value="irregular" selected>De forma irregular / no tengo ingreso fijo</option></select>
 <label for="obCs">Estilo del coach</label><select id="obCs"><option value="cercano">Cercano y amigable</option><option value="directo">Directo y al grano</option><option value="motivador">Motivador y entusiasta</option><option value="calmado">Calmado y tranquilo</option></select><small>El género solo ajusta el trato; tus consejos se basan en tus números.</small>
 <div class="bt"><button type="button" class="btn sec" id="obCa" hidden>Cancelar</button><button type="button" class="btn" id="obNx">Continuar</button></div></div>
 <div id="ob2" hidden><label for="obB">Dinero que tienes hoy ($)</label><input id="obB" type="number" step="0.01" min="0" placeholder="0.00">
 <label for="obG">Primera meta de ahorro</label><input id="obG" placeholder="Ej. Laptop, viaje, fondo de emergencia"><label for="obT">¿Cuánto cuesta? ($)</label><input id="obT" type="number" step="0.01" min="0">
 <label for="obP">Crea un PIN de 4 números</label><input id="obP" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="Será tu llave de acceso"><label for="obP2">Confirma tu PIN</label><input id="obP2" type="password" inputmode="numeric" maxlength="4" autocomplete="off"><label style="display:flex;gap:8px;align-items:center;font-weight:500"><input type="checkbox" id="obBio" style="width:auto"> Abrir también con la huella o el rostro de mi celular</label>
 <div class="bt"><button type="button" class="btn sec" id="obBk">Atrás</button><button type="button" class="btn" id="obGo">Empezar</button></div></div></form></dialog>
-<dialog id="dPf"><form id="fPf"><h2>Perfil</h2><label for="pfN">Nombre del perfil</label><input id="pfN" required><label for="pfPn">Nombre preferido</label><input id="pfPn" autocomplete="off" placeholder="¿Cómo quieres que te llame tu coach?"><div class="g2"><div><label for="pfAg">Edad</label><input id="pfAg" type="number" inputmode="numeric" min="10" max="120" step="1"></div><div><label for="pfGe">Género</label><select id="pfGe"><option value="mujer">Mujer</option><option value="hombre">Hombre</option><option value="otro">Otro</option><option value="no" selected>Prefiero no indicarlo</option></select></div></div><label for="pfO">¿A qué te dedicas?</label><select id="pfO"><option value="estudiante">Estudio</option><option value="trabaja">Trabajo</option><option value="ambos">Trabajo y estudio</option><option value="independiente">Trabajo por cuenta propia</option><option value="otro">Otra situación</option></select><div id="pfW" hidden><label for="pfS">Sueldo mensual ($)</label><input id="pfS" type="number" step="0.01" min="0"></div><label for="pfCs">Estilo del coach</label><select id="pfCs"><option value="cercano">Cercano y amigable</option><option value="directo">Directo y al grano</option><option value="motivador">Motivador y entusiasta</option><option value="calmado">Calmado y tranquilo</option></select><label for="pfB">Dinero inicial ($)</label><input id="pfB" type="number" step="0.01" min="0" required>
+<dialog id="dPf"><form id="fPf"><h2>Perfil</h2><label for="pfN">Nombre del perfil</label><input id="pfN" required><label for="pfPn">Nombre preferido</label><input id="pfPn" autocomplete="off" placeholder="¿Cómo quieres que te llame tu coach?"><div class="g2"><div><label for="pfAg">Edad</label><input id="pfAg" type="number" inputmode="numeric" min="10" max="120" step="1"></div><div><label for="pfGe">Género</label><select id="pfGe"><option value="mujer">Mujer</option><option value="hombre">Hombre</option><option value="otro">Otro</option><option value="no" selected>Prefiero no indicarlo</option></select></div></div><label for="pfO">¿A qué te dedicas?</label><select id="pfO"><option value="estudiante">Estudio</option><option value="trabaja">Trabajo</option><option value="ambos">Trabajo y estudio</option><option value="independiente">Trabajo por cuenta propia</option><option value="otro">Otra situación</option></select><div id="pfW" hidden><label for="pfS">Sueldo mensual ($)</label><input id="pfS" type="number" step="0.01" min="0"></div><label for="pfIf">¿Cada cuánto recibes dinero?</label><select id="pfIf"><option value="semanal">Cada semana</option><option value="mensual">Cada mes</option><option value="irregular">De forma irregular / no tengo ingreso fijo</option></select><label for="pfCs">Estilo del coach</label><select id="pfCs"><option value="cercano">Cercano y amigable</option><option value="directo">Directo y al grano</option><option value="motivador">Motivador y entusiasta</option><option value="calmado">Calmado y tranquilo</option></select><label for="pfB">Dinero inicial ($)</label><input id="pfB" type="number" step="0.01" min="0" required>
 <label for="pfP">Cambiar PIN de este perfil (4 números, distinto al de tu celular)</label><input id="pfP" type="password" inputmode="numeric" maxlength="4" placeholder="Vacío = no cambiar"><button type="button" class="lnk" id="swP">Cambiar de perfil</button><button type="button" class="lnk" id="apOpen" style="display:block;margin-top:6px">Activos y pasivos</button><button type="button" class="lnk" id="bioOn" style="display:block;margin-top:6px">Activar huella o rostro</button><label>Respaldo de tus datos</label><p class="note warn" role="note">El PIN ayuda a bloquear el acceso a la app, pero los datos financieros guardados en este navegador no están cifrados. Descarga respaldos periódicamente y evita borrar los datos del navegador sin guardar una copia.</p><div class="bt" style="margin-top:4px"><button type="button" class="btn sec" id="bkDl">Descargar respaldo</button><button type="button" class="btn sec" id="bkUp">Restaurar respaldo</button></div><input type="file" id="bkFile" accept=".json,application/json" hidden><div class="bt"><button type="button" class="btn sec" data-x>Cancelar</button><button class="btn">Guardar</button></div><div class="bt"><button type="button" class="lnk out" id="wipe" style="color:var(--out)">Borrar este perfil y sus datos</button></div></form></dialog>
 <dialog id="dTx"><form id="fTx"><h2 id="txT"></h2><div class="seg"><button type="button" data-t="income">Ingreso</button><button type="button" data-t="expense">Egreso</button></div>
 <label for="txA">Monto ($)</label><input id="txA" type="number" step="0.01" min="0.01" required inputmode="decimal" placeholder="0.00">
@@ -213,7 +214,7 @@ bioTaken=()=>regLoad().some(p=>p.bio&&p.id!==PID);
 function migrate(){if(regLoad().length)return;let P=null;try{P=JSON.parse(lsGet(LEG.profile))}catch(e){}if(!P)return;const id=newId();P.id=id;const entries=[];TB.forEach(t=>{const v=t==='profile'?JSON.stringify(P):LEG[t]?lsGet(LEG[t]):null;if(v!==null)entries.push({key:pk(id,t),value:v})});entries.push({key:PR_K,value:JSON.stringify([{id,name:P.username||'Perfil',pin:lsGet('ahorroApp_pin')||null,bio:lsGet('ahorroApp_bio')||null}])});if(!writeBatch(entries))return;TB.forEach(t=>{if(LEG[t])lsDel(LEG[t])});lsDel('ahorroApp_pin');lsDel('ahorroApp_bio')}
 // Datos del perfil activo: viven dentro de S.profile. El género solo adapta el trato (vocativo); nunca entra en cálculos ni consejos.
 const GE=['mujer','hombre','otro','no'],CS=['cercano','directo','motivador','calmado'],
-normP=P=>{P.id=P.id||'p'+Date.now();P.pref=P.pref||'';P.age=P.age||'';P.gender=GE.includes(P.gender)?P.gender:'no';P.coach=CS.includes(P.coach)?P.coach:'cercano';return P},
+normP=P=>{P.id=P.id||'p'+Date.now();P.pref=P.pref||'';P.age=P.age||'';P.gender=GE.includes(P.gender)?P.gender:'no';P.coach=CS.includes(P.coach)?P.coach:'cercano';if(P.incomeFrequency&&!['semanal','mensual','irregular'].includes(P.incomeFrequency))P.incomeFrequency='irregular';return P},
 dn=P=>P.pref||P.username,isW=o=>['trabaja','independiente','ambos'].includes(o),
 LD={motivador:{g:'¡Vas por muy buen camino! ',w:'Esto se arregla con un pequeño ajuste. '},calmado:{g:'Con calma, vas bien. ',w:'Sin prisa, pero conviene atender esto. '}},
 sty=(c,k,t)=>{if(c==='directo')t=t.replace(/\s*[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F]+/gu,'');return((LD[c]||{})[k]||'')+t};
@@ -283,31 +284,167 @@ const budgetClick=e=>{
 $('budgetList').onclick=$('budgetCards').onclick=budgetClick;$('newBudget2').onclick=()=>openBudget();
 
 function renderUpcoming(){const items=MisFinanzasRecurrence.upcomingOccurrences(S.rec,ymd(new Date()),30,ymd);$('upcomingList').innerHTML=items.length?items.map(x=>{const d=new Date(x.date+'T00:00:00'),dateLabel=d.toLocaleDateString('es-EC',{day:'2-digit',month:'short'});return '<div class="upcoming-item"><span class="upcoming-date">'+esc(dateLabel)+'</span><div class="upcoming-main"><b>'+esc(x.description)+'</b><small>'+esc(x.type==='income'?'Cobro previsto':'Pago previsto')+(x.category?' · '+esc(x.category):'')+'</small></div><span class="upcoming-amount '+esc(x.type)+'">'+(x.type==='income'?'+':'−')+m(x.amount)+'</span></div>'}).join(''):'<p class="empty">No tienes pagos ni cobros fijos previstos para los próximos 30 días. Si tienes alguno, puedes registrarlo como fijo desde el botón +.</p>'}
+function renderCoachIncome(){const el=$('coachIncome');if(!el)return;const c=coachData();if(c.pend>0&&c.nx){el.hidden=false;el.textContent='Próximo ingreso previsto: '+m(c.pend)+' · '+c.D(c.nx.date).toLocaleDateString('es-EC',{day:'numeric',month:'long'})+' (no incluido en tu disponible)'}else{el.hidden=true;el.textContent=''}}
 function render(){const P=S.profile,pl=S.tx.filter(x=>inP(x.date)),i=sum(pl,'income'),o=sum(pl,'expense');
 $('hi').textContent='Hola, '+dn(P);$('bal').textContent=m(bal());$('sIn').textContent=m(i);$('sOut').textContent=m(o);$('sSv').textContent=m(sum(S.tx,'save'));
-tips(pl,i,o);charts(pl);list();fixed();goals();renderBudgets();renderUpcoming()}
+renderCoachIncome();tips(pl,i,o);charts(pl);list();fixed();goals();renderBudgets();renderUpcoming()}
 const sum1=a=>a.reduce((x,y)=>x+y,0);
-function tips(pl,i,o){const P=S.profile,nm=esc(dn(P)),vo=P.coach==='cercano'&&P.gender==='mujer'?'amiga':P.coach==='cercano'&&P.gender==='hombre'?'amigo':nm,Vo=vo.charAt(0).toUpperCase()+vo.slice(1),T=[],f=S.rec.filter(r=>r.type==='income').reduce((a,r)=>a+mo(r),0),fe=S.rec.filter(r=>r.type==='expense').reduce((a,r)=>a+mo(r),0),R=v=>m(Math.round(v)),
-ing=f>0?f:i,base=f>0?f-fe:i-o,W=S.tx.filter(x=>ymd(wk(new Date(x.date+'T00:00')))===ymd(wk(new Date()))),svT=sum(S.tx,'save');let sug=0;
-if(!S.tx.length&&!S.rec.length)T.push(['','¡Hola, '+nm+'! 💖 Registra tu primer movimiento con el botón + y aquí te digo exactamente cuántos dólares mover a tu ahorro.']);
+// ===== Coach financiero. Sigue el documento "Reglas del coach financiero – Mis Finanzas".
+// Solo usa dinero REAL registrado: un ingreso fijo que aún no llega nunca cuenta como disponible.
+// El estilo del perfil (cercano, directo, motivador, calmado) cambia SOLO el texto: las reglas, los montos y los botones son los mismos.
+const CM={
+cercano:{
+p0:v=>`¡Hola, ${v.n}! Ya empezamos. Sigue registrando tus movimientos unos días y te doy consejos con tus números reales. 💖`,
+a1:v=>`${v.Vo}, ahorita no te queda dinero libre (<b>${v.libre}</b>). Prioricemos lo esencial hasta tu próximo ingreso. ☕`,
+a2:v=>`Con tu ritmo de gasto (<b>${v.gd}</b> al día), te faltarían <b>${v.falta}</b> antes de tu próximo ingreso. Intentemos quedarnos en <b>${v.diario}</b> diarios. 💪`,
+a3:v=>`Te pasaste <b>${v.exc}</b> de tu presupuesto de <b>${v.cat}</b> (${v.gas} de ${v.lim}). No pasa nada: frenemos aquí y compensemos con otras categorías.`,
+a3f:v=>`Llegaste al límite de tu presupuesto de <b>${v.cat}</b> (${v.gas} de ${v.lim}). Cuidemos los próximos gastos de esa categoría.`,
+a4:v=>`Vas en <b>${v.gas}</b> de tus ${v.lim} en <b>${v.cat}</b>. Te quedan <b>${v.rest}</b> ${v.para}.`,
+a5:v=>`<b>${v.cat}</b> concentra el ${v.pct}% de tus gastos variables (${v.monto}). ¿Quieres ponerle un presupuesto?`,
+o1:v=>`Tienes <b>${v.libre}</b> libres hoy. Podrías apartar <b>${v.monto}</b> para “${v.meta}” y aún te queda tu colchón. 🚀`,
+o2:v=>`El ${v.dia} te llegan <b>${v.monto}</b>. Cuando se registre, veremos cuánto apartar. 😉`,
+o3:v=>`¡Solo te faltan <b>${v.falta}</b> para “${v.meta}”! Ya tienes con qué completarla. 👑`,
+o3p:v=>`Te faltan <b>${v.falta}</b> para “${v.meta}”. Guardando <b>${v.dd}</b> diarios (o <b>${v.sem}</b> por semana) llegas en ${v.nd} días. 😊`,
+o3n:v=>`Te faltan <b>${v.falta}</b> para “${v.meta}”. Con lo que tienes hoy aún no alcanza, pero con tu próximo ingreso sí. 😊`,
+o3m:v=>`Te faltan <b>${v.falta}</b> para “${v.meta}”. Con lo que tienes hoy aún no alcanza; vamos poquito a poquito. 😊`,
+l1:v=>`Gastaste ${v.pct}% menos que el período pasado. ¡Eso se nota! 🎉`,
+l2:v=>`Cerraste <b>${v.cat}</b> con <b>${v.rest}</b> de sobra. ¡Bien jugado!`,
+l3:v=>`¡Lo lograste! “${v.meta}” está completa. 💖`,
+ok:v=>`Todo en orden por ahora, ${v.n}: tienes <b>${v.libre}</b> libres. 💖`},
+directo:{
+p0:v=>`Aún hay pocos datos. Registra tus movimientos unos días y te doy consejos con tus números.`,
+a1:v=>`Dinero libre: <b>${v.libre}</b>. Prioriza lo esencial hasta tu próximo ingreso.`,
+a2:v=>`Te faltarían <b>${v.falta}</b> antes de tu próximo ingreso. Gasta como máximo <b>${v.diario}</b> al día.`,
+a3:v=>`<b>${v.cat}</b>: superaste tu presupuesto por <b>${v.exc}</b> (${v.gas} de ${v.lim}). Evita más gastos aquí.`,
+a3f:v=>`<b>${v.cat}</b>: llegaste al límite de tu presupuesto (${v.gas} de ${v.lim}). Evita más gastos aquí.`,
+a4:v=>`<b>${v.cat}</b>: ${v.gas} de ${v.lim}. Quedan <b>${v.rest}</b> ${v.para}.`,
+a5:v=>`<b>${v.cat}</b> es el ${v.pct}% de tus gastos variables (${v.monto}). ¿Le pones presupuesto?`,
+o1:v=>`Libre: <b>${v.libre}</b>. Aparta <b>${v.monto}</b> para “${v.meta}”.`,
+o2:v=>`El ${v.dia} llegan <b>${v.monto}</b>. Se usarán en los cálculos cuando estén registrados.`,
+o3:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Tienes saldo para completarla.`,
+o3p:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Ahorra <b>${v.dd}</b> al día o <b>${v.sem}</b> por semana: ${v.nd} días.`,
+o3n:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Hoy no alcanza; con tu próximo ingreso sí.`,
+o3m:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Hoy no alcanza.`,
+l1:v=>`Gasto variable: ${v.pct}% menos que el período anterior.`,
+l2:v=>`<b>${v.cat}</b>: cerrado dentro del presupuesto, sobran <b>${v.rest}</b>.`,
+l3:v=>`Meta “${v.meta}” completada.`,
+ok:v=>`Todo en orden. Libre: <b>${v.libre}</b>.`},
+motivador:{
+p0:v=>`¡Hola, ${v.n}, arrancamos! Registra tus movimientos unos días y verás consejos hechos con tus números reales. 🌟`,
+a1:v=>`Toca ajustar: hoy no tienes dinero libre (<b>${v.libre}</b>). Si te enfocas en lo esencial, llegas a tu próximo ingreso. 💪`,
+a2:v=>`¡Todavía se puede! Si bajas a <b>${v.diario}</b> diarios, llegas a tu próximo ingreso sin problema. 🔥`,
+a3:v=>`Te pasaste <b>${v.exc}</b> en <b>${v.cat}</b> (${v.gas} de ${v.lim}), pero aún puedes equilibrar el período. ¡Frenemos aquí y compensemos! 💪`,
+a3f:v=>`Llegaste justo al límite en <b>${v.cat}</b> (${v.gas} de ${v.lim}). Cuida los próximos gastos y sigues con el control. 💪`,
+a4:v=>`¡Ojo, vas cerca del límite en <b>${v.cat}</b>! Llevas ${v.gas} de ${v.lim}; con los <b>${v.rest}</b> que quedan puedes cerrar bien el período. 🎯`,
+a5:v=>`<b>${v.cat}</b> se lleva el ${v.pct}% de tus gastos variables (${v.monto}). ¡Ponle un presupuesto y retoma el control! 🚀`,
+o1:v=>`¡Tienes <b>${v.libre}</b> libres! Aparta <b>${v.monto}</b> y acércate a “${v.meta}”. ¡Cada paso cuenta! 🎯`,
+o2:v=>`¡El ${v.dia} llegan <b>${v.monto}</b>! Cuando se registren, planeamos cuánto apartar para tus metas. 🌟`,
+o3:v=>`¡Estás a <b>${v.falta}</b> de lograr “${v.meta}”! Tienes lo necesario para cerrarla hoy. 🏆`,
+o3p:v=>`¡Ya casi! Te faltan <b>${v.falta}</b> para “${v.meta}”. Con <b>${v.dd}</b> al día llegas en ${v.nd} días. 🔥`,
+o3n:v=>`¡Ya casi! Te faltan <b>${v.falta}</b> para “${v.meta}”. Hoy aún no alcanza, pero con tu próximo ingreso la completas. 🔥`,
+o3m:v=>`¡Ya casi! Te faltan <b>${v.falta}</b> para “${v.meta}”. Hoy aún no alcanza, pero cada aporte te acerca. 🔥`,
+l1:v=>`¡Bajaste tu gasto ${v.pct}% frente al período pasado! ¡Sigue así! 🚀`,
+l2:v=>`¡Cerraste <b>${v.cat}</b> con <b>${v.rest}</b> de sobra! ¡Eso es tener el control! 🏅`,
+l3:v=>`¡Meta cumplida! “${v.meta}” está completa. ¡Lo lograste! 🏆`,
+ok:v=>`¡Todo en orden, ${v.n}! Tienes <b>${v.libre}</b> libres. ¡Sigue así! 🌟`},
+calmado:{
+p0:v=>`Hola, ${v.n}. Con calma, ve registrando tus movimientos. En unos días podré darte consejos con tus números reales.`,
+a1:v=>`Por ahora no queda dinero libre (<b>${v.libre}</b>). Puede ayudar dejar solo lo esencial hasta tu próximo ingreso.`,
+a2:v=>`Al ritmo actual faltarían <b>${v.falta}</b> antes de tu próximo ingreso. Podría ayudar mantener unos <b>${v.diario}</b> diarios.`,
+a3:v=>`Superaste tu presupuesto de <b>${v.cat}</b> por <b>${v.exc}</b> (${v.gas} de ${v.lim}). Se puede equilibrar con otras categorías.`,
+a3f:v=>`Llegaste al límite de tu presupuesto de <b>${v.cat}</b> (${v.gas} de ${v.lim}). Puedes ir con calma con los próximos gastos de esa categoría.`,
+a4:v=>`En <b>${v.cat}</b> llevas ${v.gas} de ${v.lim}. Quedan <b>${v.rest}</b> ${v.para}.`,
+a5:v=>`<b>${v.cat}</b> representa el ${v.pct}% de tus gastos variables (${v.monto}). Si quieres, puedes ponerle un presupuesto.`,
+o1:v=>`Hoy tienes <b>${v.libre}</b> libres. Si quieres, puedes apartar <b>${v.monto}</b> para “${v.meta}” sin tocar tu colchón.`,
+o2:v=>`El ${v.dia} está previsto un ingreso de <b>${v.monto}</b>. Cuando se registre, podremos ver cuánto apartar.`,
+o3:v=>`Para “${v.meta}” faltan <b>${v.falta}</b>, y hoy cuentas con lo necesario para completarla.`,
+o3p:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Si apartas <b>${v.dd}</b> al día, llegarías en unos ${v.nd} días, sin prisa.`,
+o3n:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Hoy aún no alcanza, pero con tu próximo ingreso podrás completarla, sin prisa.`,
+o3m:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Hoy aún no alcanza; puedes seguir apartando a tu ritmo.`,
+l1:v=>`Este período gastaste ${v.pct}% menos que el anterior. Buen ritmo.`,
+l2:v=>`Cerraste <b>${v.cat}</b> dentro de tu presupuesto, con <b>${v.rest}</b> de sobra.`,
+l3:v=>`Completaste “${v.meta}”. Un logro que vale la pena reconocer.`,
+ok:v=>`Todo está en orden por ahora. Tienes <b>${v.libre}</b> libres.`}};
+// Cálculos base del coach (disponible, libre, ingreso por llegar, ritmo de gasto, proyección...). Todo sale de lo registrado de verdad.
+function coachData(){
+const now=new Date(),td=ymd(now),D=s=>new Date(s+'T00:00:00'),dd=(a,b)=>Math.round((D(b)-D(a))/864e5),add=(s,n)=>{const d=D(s);d.setDate(d.getDate()+n);return ymd(d)},
+inc=S.rec.filter(r=>r.type==='income'),wI=sum1(inc.filter(r=>r.frequency==='weekly').map(mo)),mI=sum1(inc.filter(r=>r.frequency!=='weekly').map(mo)),
+// La frecuencia elegida por la persona manda. Solo perfiles antiguos sin esta preferencia usan una inferencia conservadora.
+freq=['semanal','mensual','irregular'].includes(S.profile.incomeFrequency)?S.profile.incomeFrequency:(!inc.length?'irregular':(wI>mI?'semanal':'mensual')),
+up=MisFinanzasRecurrence.upcomingOccurrences(S.rec,td,35,ymd),
+nx=freq==='irregular'?null:(up.find(x=>x.type==='income')||null),
+dias=nx?dd(td,nx.date):null,
+hor=nx?nx.date:add(td,30),
+fijosP=sum1(up.filter(x=>x.type==='expense'&&x.date<=hor).map(x=>x.amount)),
+pend=nx?sum1(up.filter(x=>x.type==='income'&&x.date===nx.date).map(x=>x.amount)):0,
+fd=S.tx.map(x=>x.date).filter(Boolean).sort()[0]||null,
+incD=freq==='irregular'?[]:[...new Set(S.tx.filter(x=>x.type==='income'&&x.fixed&&x.date<=td).map(x=>x.date))].sort().reverse(),
+last=incD[0]&&dd(incD[0],td)<=40?incD[0]:null,
+// Período: desde el último ingreso fijo registrado; si no hay, la semana o el mes en curso (irregular: últimos 30 días).
+start=last||(freq==='semanal'?ymd(wk(now)):freq==='mensual'?td.slice(0,8)+'01':add(td,-29)),
+dataDays=fd?Math.min(dd(start,td)+1,dd(fd,td)+1):0,
+vv=S.tx.filter(x=>x.type==='expense'&&!x.fixed&&x.date>=start&&x.date<=td),
+gd=dataDays>=3?sum1(vv.map(x=>x.amount))/dataDays:null,
+disp=bal(),libre=disp-fijosP,colchon=gd!=null?gd*3:0,
+proy=gd!=null&&dias!=null?gd*dias:null,
+prevStart=incD[1]&&incD[1]<start?incD[1]:add(start,freq==='semanal'?-7:-30),
+prevV=S.tx.filter(x=>x.type==='expense'&&!x.fixed&&x.date>=prevStart&&x.date<start),
+prevDaily=sum1(prevV.map(x=>x.amount))/Math.max(1,dd(prevStart,start));
+return{now,td,D,dd,add,freq,nx,dias,fijosP,pend,fd,start,vv,gd,disp,libre,colchon,proy,prevStart,prevV,prevDaily,usoDias:dataDays,periodMoves:S.tx.filter(x=>x.date>=start&&x.date<=td).length}}
+function tips(pl,i,o){const P=S.profile,st=CM[P.coach]||CM.cercano,nm=esc(dn(P)),Vo=P.coach==='cercano'&&P.gender==='mujer'?'Amiga':P.coach==='cercano'&&P.gender==='hombre'?'Amigo':nm,
+c=coachData(),A=[],out=[],e=esc,
+// Un mensaje = clase de color + texto del estilo elegido + botón opcional (label + acción).
+M=(k,id,v,b)=>({k,t:st[id](Object.assign({n:nm,Vo},v)),b}),
+// P0: pocos datos (menos de 5 movimientos o menos de 3 días de uso) → solo el mensaje de bienvenida.
+poco=c.periodMoves<5||c.usoDias<3;
+if(poco)out.push(M('','p0',{}));
 else{
-if(['estudiante','ambos'].includes(P.occ)&&f===0)T.push(['',(P.occ==='ambos'?'Mientras estudias y trabajas':'Como estudiante')+' tus ingresos cambian mucho, '+nm+'. Registra tu mesada o beca como ingreso fijo y así calculo tu ahorro exacto. 📚']);
-if(ing>0){
-if(base<=0){sug=Math.max(1,Math.round(ing*.05));T.push(['w',f>0?'Ojo aquí, '+nm+'... Tus gastos fijos ya suman <b>'+m(fe)+'</b> de tus <b>'+m(f)+'</b> que recibes. Casi no hay margen, así que guarda solo <b>'+R(sug)+'</b> por ahora para tener un colchón. Primero la tranquilidad, luego los gustitos. 🌷':'En este periodo gastaste <b>'+m(o)+'</b> y solo ingresaron <b>'+m(i)+'</b>. Ojo, '+vo+': pausa lo que no sea necesario y guarda solo <b>'+R(sug)+'</b> por ahora. 🌷'])}
-else{const fr=base/ing;sug=Math.round(fr<.15?base*.5:fr<.4?ing*.2:base*.4);sug=Math.max(1,Math.min(sug,Math.floor(Math.max(base,1))));
-T.push(['g',(fr<.4?'Después de tus gastos tienes <b>'+m(base)+'</b> libres'+(isW(P.occ)&&P.salary?' de tu sueldo de '+m(P.salary):'')+'. Te sugiero guardar exactamente <b>'+R(sug)+'</b> hoy mismo, ¡antes de que a ese dinero le salgan alas! 💅✨':'¡'+Vo+', estás organizándote genial! Te quedan <b>'+m(base)+'</b> libres. Manda <b>'+R(sug)+'</b> a tus ahorros para llegar a tu meta súper rápido. 🚀💖')+' <button class="lnk" id="goSave">Apartar '+R(sug)+'</button>'])}}
-if(f>0&&fe/f>.5)T.push(['w','Tus gastos fijos se llevan el <b>'+Math.round(fe/f*100)+'%</b> de tus ingresos fijos ('+m(fe)+' de '+m(f)+'). Lo ideal es hasta 50%: revisa suscripciones y facturas. 🔍']);
-const vv=pl.filter(x=>x.type==='expense'&&!x.fixed),vo=sum(vv,'expense');
-if(vv.length){const c={},d={};vv.forEach(x=>{c[x.category]=(c[x.category]||0)+x.amount;(d[x.description]=d[x.description]||[]).push(x.amount)});
-const tc=Object.entries(c).sort((a,b)=>b[1]-a[1])[0];if(tc[1]/vo>.3&&vv.length>2)T.push(['w',Vo+', tenemos que hablar... Ya van <b>'+m(tc[1])+'</b> solo en <b>'+esc(tc[0])+'</b> ('+Math.round(tc[1]/vo*100)+'% de tus gastos variables). Pongámosle un tope de <b>'+R(tc[1]*.8)+'</b> para que te queden dólares libres para tus metas. ☕']);
-const h=Object.entries(d).filter(e=>e[1].length>=3&&sum1(e[1])/e[1].length<=6).sort((a,b)=>sum1(b[1])-sum1(a[1]))[0];
-if(h)T.push(['w','¡Alerta de fugas! Tus gustitos bajo <b>“'+esc(h[0])+'”</b> parecen inofensivos (unos '+m(sum1(h[1])/h[1].length)+' cada vez), pero ya van <b>'+m(sum1(h[1]))+'</b> en '+h[1].length+' veces. 🔍✨'])}
-const imp=sum1(W.filter(x=>x.type==='expense'&&!x.fixed&&(x.category==='Entretenimiento'||x.category==='Otros gastos')).map(x=>x.amount));
-if(imp>=Math.max(10,ing*.08))T.push(['','¡Respira! Llevas <b>'+m(imp)+'</b> en compras no planificadas esta semana. Regla de las 48 horas: si algo te tienta, espera dos días antes de gastar. 😉']);
-if(fe>0)T.push(['','Tus gastos fijos mensuales son <b>'+m(fe)+'</b>, así que tu colchón de paz ideal es <b>'+R(fe*3)+'</b> (3 meses de pagos fijos). Ahorrado hasta hoy: <b>'+m(svT)+'</b>. 🕊️']);
-S.goals.forEach(g=>{const s=S.tx.filter(x=>x.goalId===g.id).reduce((a,x)=>a+x.amount,0),q=g.target-s;if(q>0&&s/g.target>=.7)T.push(['g','¡Qué emoción! Solo te faltan <b>'+m(q)+'</b> para “'+esc(g.title)+'”. Si guardas <b>'+m(q/7)+'</b> diarios esta semana, ¡la alcanzas! 👑'])});
-const wl=sum(W,'income')-sum(W,'expense');if(new Date().getDay()===0&&wl>0)T.push(['g','¡Cierre de semana exitoso! Te quedaron <b>'+m(wl)+'</b> libres. Mándalos a tu ahorro antes de que te tienten. 🐷💖'])}
-$('tips').innerHTML=T.slice(0,5).map(t=>'<div class="tip '+t[0]+'">'+sty(P.coach,t[0],t[1])+'</div>').join('');if($('goSave'))$('goSave').onclick=()=>openSave(null,sug)}
+const BD=budgetData(),pm=S.budgets,L=c.libre,cap=Math.max(0,L-c.colchon),
+G=S.goals.map(g=>{const s=S.tx.filter(x=>x.goalId===g.id).reduce((a,x)=>a+x.amount,0);return{g,s,q:g.target-s,pr:g.target>0?s/g.target:0}}),act=G.filter(x=>x.q>=.01&&x.g.target>0),
+dayL=c.dias!=null?Math.max(1,c.dias):c.freq==='semanal'?Math.max(1,7-(c.usoDias%7)):c.freq==='mensual'?new Date(c.now.getFullYear(),c.now.getMonth()+1,0).getDate()-c.now.getDate()+1:Math.max(1,30-c.usoDias),
+// ---- Alertas (prioridad 1): como máximo una, la de menor número ----
+al=[];
+if(L<=0)al.push(M('w','a1',{libre:m(L)}));
+else if(c.proy!=null&&c.proy>L)al.push(M('w','a2',{gd:m(c.gd),falta:m(c.proy-L),diario:m(L/c.dias)}));
+const ov=BD.filter(b=>b.limit>0&&b.spent>=b.limit).sort((a,b)=>(b.spent-b.limit)-(a.spent-a.limit)||b.pct-a.pct)[0];
+if(ov){const x=ov.spent>ov.limit;al.push(M('w',x?'a3':'a3f',{cat:e(ov.category),exc:m(ov.spent-ov.limit),gas:m(ov.spent),lim:m(ov.limit)},{l:'Ver presupuestos',f:()=>go('budgets')}))}
+const wn=BD.filter(b=>b.st==='warn').sort((a,b)=>b.pct-a.pct)[0];
+if(wn)al.push(M('w','a4',{cat:e(wn.category),gas:m(wn.spent),lim:m(wn.limit),rest:m(wn.left),para:dayL>1?'para los próximos '+dayL+' días':'para hoy'},{l:'Ver presupuestos',f:()=>go('budgets')}));
+// A5: categoría con 5 o más movimientos y más del 40 % del gasto variable, sin presupuesto. No propone ningún tope: el monto lo elige la persona.
+const tv=sum1(c.vv.map(x=>x.amount)),cg={};c.vv.forEach(x=>{const k=x.category||'Otros gastos';(cg[k]=cg[k]||{t:0,n:0});cg[k].t+=x.amount;cg[k].n++});
+const t5=Object.entries(cg).filter(([k,v])=>!pm.some(b=>b.category===k)&&v.n>=5&&tv>0&&v.t/tv>.4).sort((a,b)=>b[1].t-a[1].t)[0];
+if(t5)al.push(M('w','a5',{cat:e(t5[0]),pct:Math.round(t5[1].t/tv*100),monto:m(t5[1].t)},{l:'Crear presupuesto',f:()=>{openBudget();const s=$('budgetCategory');if(s&&[...s.options].some(x=>x.value===t5[0]))s.value=t5[0]}}));
+// ---- Oportunidades (prioridad 2) ----
+const op=[],liq=L<=0||(c.proy!=null&&c.proy>L),fl=x=>Math.round(x*100)/100;
+if(!liq){
+// O3: meta que se puede completar hoy sin tocar el colchón
+const c3=act.filter(x=>x.q<=cap).sort((a,b)=>a.q-b.q)[0];
+if(c3)op.push(M('g','o3',{falta:m(c3.q),meta:e(c3.g.title)},{l:'Completar meta',f:()=>openSave(c3.g.id,fl(c3.q))}));
+// O1: apartar para una meta = el menor entre lo que falta y lo libre menos el colchón (mínimo 1 dólar)
+const c1=act.filter(x=>x.q>cap).sort((a,b)=>b.pr-a.pr)[0],mt=Math.floor(Math.min(cap,c1?c1.q:0)*100)/100;
+if(!c3&&c1&&mt>=1)op.push(M('g','o1',{libre:m(L),monto:m(mt),meta:e(c1.g.title)},{l:'Apartar '+m(mt),f:()=>openSave(c1.g.id,mt)}));
+// O3 (no alcanza hoy): meta cerca (70 % o más); el ritmo diario solo se muestra si cabe en lo que te sobra después de tu gasto habitual
+const n3=act.filter(x=>x.q>cap).sort((a,b)=>a.q-b.q)[0];
+if(n3){const mg=c.gd!=null&&c.dias!=null?(L-c.proy)/c.dias:0,nd=mg>0?Math.ceil(n3.q/mg):0;
+if(mg>=.5&&nd<=90)op.push(M('g','o3p',{falta:m(n3.q),meta:e(n3.g.title),dd:m(mg),sem:m(mg*7),nd}));
+else op.push(M('g',c.pend>0&&c.pend+cap>=n3.q?'o3n':'o3m',{falta:m(n3.q),meta:e(n3.g.title)}))}}
+// O2: ingreso fijo por llegar (solo informativo, sin botón de apartar y sin contarlo como disponible)
+if(c.pend>0)op.push(M('g','o2',{dia:c.D(c.nx.date).toLocaleDateString('es-EC',{day:'numeric',month:'long'}),monto:m(c.pend)}));
+// ---- Logros (prioridad 3) ----
+const lg=[],pk=c.td.slice(0,7),pmk=ymd(new Date(c.now.getFullYear(),c.now.getMonth()-1,1)).slice(0,7);
+const gastoActual=sum1(c.vv.map(x=>x.amount)),gastoAnterior=sum1(c.prevV.map(x=>x.amount));
+if(c.vv.length>=3&&c.prevV.length>=3&&gastoAnterior>0&&gastoActual<=gastoAnterior*.9)lg.push(M('g','l1',{pct:Math.round((1-gastoActual/gastoAnterior)*100)}));
+if(c.now.getDate()<=7&&c.fd&&c.fd<=pmk+'-01'){const r2=BD.map(b=>({b,sp:S.tx.filter(x=>x.type==='expense'&&x.category===b.category&&x.date.slice(0,7)===pmk).reduce((a,x)=>a+x.amount,0)})).filter(x=>x.sp>0&&x.sp<x.b.limit).sort((a,b)=>(b.b.limit-b.sp)-(a.b.limit-a.sp))[0];
+if(r2)lg.push(M('g','l2',{cat:e(r2.b.category),rest:m(r2.b.limit-r2.sp)}))}
+const l3=G.filter(x=>x.g.target>0&&x.s>=x.g.target&&(S.tx.filter(t=>t.goalId===x.g.id).map(t=>t.date).sort().pop()||'')>=c.add(c.td,-7))[0];
+if(l3)lg.push(M('g','l3',{meta:e(l3.g.title)}));
+// ---- Qué se muestra: máximo 2 mensajes ----
+// Si hay alerta: una alerta + un mensaje más (con A1 o A2, nunca una sugerencia de apartar). Sin alertas: una oportunidad + un logro.
+if(al.length){out.push(al[0]);const x=op[0]||lg[0];if(x)out.push(x)}
+else{if(op[0])out.push(op[0]);if(lg[0])out.push(lg[0]);else if(op[1])out.push(op[1])}
+if(!out.length)out.push(M('g','ok',{libre:m(L)}))}
+$('tips').innerHTML=out.map(t=>{const k=t.b?A.push(t.b.f)-1:-1;return'<div class="tip '+t.k+'">'+t.t+(t.b?' <button type="button" class="lnk" data-ca="'+k+'">'+t.b.l+'</button>':'')+'</div>'}).join('');
+$('tips').onclick=ev=>{const b=ev.target.closest('[data-ca]');if(b&&A[b.dataset.ca])A[b.dataset.ca]()}}
 function setSalary(){const P=S.profile,it=S.rec.find(r=>r.id==='salary');if(isW(P.occ)&&P.salary>0){if(it)it.amount=P.salary;else S.rec.push({id:'salary',type:'income',amount:P.salary,description:'Sueldo',frequency:'monthly',since:ymd(new Date()),posted:[]})}else S.rec=S.rec.filter(r=>r.id!=='salary')}
 function autoPost(){const it=S.rec.find(r=>r.id==='salary');if(!it)return;it.posted=it.posted||[];const td=ymd(new Date()),day=Math.min(+it.since.slice(8),28);let d=new Date(+it.since.slice(0,4),+it.since.slice(5,7)-1,1),ch=0;
 while(ymd(d)<=td){const k=ymd(d).slice(0,7),dt=k===it.since.slice(0,7)?it.since:k+'-'+p(day);if(!it.posted.includes(k)&&dt<=td&&dt>=it.since){it.posted.push(k);S.tx.push({id:Date.now()+'s'+k,type:'income',amount:it.amount,description:'Sueldo',category:'Trabajo',sub:'Sueldo',date:dt,fixed:true});ch++}d=new Date(d.getFullYear(),d.getMonth()+1,1)}
@@ -375,15 +512,15 @@ document.querySelector('#fxBlk').onclick=e=>{const edit=e.target.dataset.reEdit;
 $('newG').onclick=()=>{$('glN').value='';$('glT').value='';$('dGl').showModal();$('glN').focus()};
 $('fGl').onsubmit=e=>{e.preventDefault();const title=$('glN').value.trim(),target=+$('glT').value;if(!title||!(target>0))return toast('Escribe un nombre y una meta mayor a $0');const before=snapshotState();S.goals.push({id:'g'+Date.now(),title,target});if(!save()){restoreState(before);render();return}$('dGl').close();render();toast('Meta creada')};
 $('gl').onclick=e=>{const a=e.target.dataset.a,g=e.target.dataset.g;if(a)openSave(a);if(g){const goal=S.goals.find(x=>String(x.id)===String(g));if(!goal)return;const linked=S.tx.filter(x=>String(x.goalId)===String(goal.id)).length,msg=linked?'¿Eliminar la meta "'+goal.title+'"? Los '+linked+' movimiento(s) de ahorro vinculados se conservarán en el historial, pero pasarán a contarse como ahorro general.':'¿Eliminar la meta "'+goal.title+'"?';if(!confirm(msg))return;const before=snapshotState();S.goals=S.goals.filter(x=>String(x.id)!==String(g));if(!save()){restoreState(before);render();return}render();toast('Meta eliminada','Deshacer',()=>{const undoBefore=snapshotState();S.goals=JSON.parse(before).goals;if(!save()){restoreState(undoBefore);render();return}render()})}};
-$('prof').onclick=()=>{$('pfP').value='';$('bioOn').textContent=bioId()?'Quitar huella o rostro':'Activar huella o rostro';$('pfN').value=S.profile.username;$('pfPn').value=S.profile.pref||'';$('pfAg').value=S.profile.age||'';$('pfGe').value=S.profile.gender||'no';$('pfCs').value=S.profile.coach||'cercano';$('pfO').value=S.profile.occ||'estudiante';$('pfS').value=S.profile.salary||'';$('pfO').onchange();$('pfB').value=S.profile.initialBalance;$('dPf').showModal()};
-$('fPf').onsubmit=async e=>{e.preventDefault();const profileBefore=snapshotState(),registryBefore=regLoad(),pn=$('pfP').value;if(pn){if(!pinOk(pn))return alert('El PIN debe tener 4 números');if(await pinTaken(pn,PID))return alert('Ese PIN ya está en uso por otro perfil. Elige uno distinto.');let h;try{h=await hashPin(pn)}catch(e){return alert(e.message)}if(!regUpd(PID,p=>{p.pin=h}))return alert('No se pudo guardar el nuevo PIN. No se cambiaron tus datos.');}S.profile.username=$('pfN').value.trim();regUpd(PID,p=>{p.name=S.profile.username});S.profile.pref=$('pfPn').value.trim();S.profile.age=+$('pfAg').value||'';S.profile.gender=$('pfGe').value;S.profile.coach=$('pfCs').value;S.profile.initialBalance=+$('pfB').value||0;S.profile.occ=$('pfO').value;S.profile.salary=+$('pfS').value||0;setSalary();autoPost();if(!save()){restoreState(profileBefore);regSave(registryBefore);render();return}$('dPf').close();render()};
+$('prof').onclick=()=>{$('pfP').value='';$('bioOn').textContent=bioId()?'Quitar huella o rostro':'Activar huella o rostro';$('pfN').value=S.profile.username;$('pfPn').value=S.profile.pref||'';$('pfAg').value=S.profile.age||'';$('pfGe').value=S.profile.gender||'no';$('pfCs').value=S.profile.coach||'cercano';$('pfIf').value=S.profile.incomeFrequency|| (S.rec.some(r=>r.type==='income'&&r.frequency==='weekly')?'semanal':S.rec.some(r=>r.type==='income')?'mensual':'irregular');$('pfO').value=S.profile.occ||'estudiante';$('pfS').value=S.profile.salary||'';$('pfO').onchange();$('pfB').value=S.profile.initialBalance;$('dPf').showModal()};
+$('fPf').onsubmit=async e=>{e.preventDefault();const profileBefore=snapshotState(),registryBefore=regLoad(),pn=$('pfP').value;if(pn){if(!pinOk(pn))return alert('El PIN debe tener 4 números');if(await pinTaken(pn,PID))return alert('Ese PIN ya está en uso por otro perfil. Elige uno distinto.');let h;try{h=await hashPin(pn)}catch(e){return alert(e.message)}if(!regUpd(PID,p=>{p.pin=h}))return alert('No se pudo guardar el nuevo PIN. No se cambiaron tus datos.');}S.profile.username=$('pfN').value.trim();regUpd(PID,p=>{p.name=S.profile.username});S.profile.pref=$('pfPn').value.trim();S.profile.age=+$('pfAg').value||'';S.profile.gender=$('pfGe').value;S.profile.coach=$('pfCs').value;S.profile.incomeFrequency=$('pfIf').value;S.profile.initialBalance=+$('pfB').value||0;S.profile.occ=$('pfO').value;S.profile.salary=+$('pfS').value||0;setSalary();autoPost();if(!save()){restoreState(profileBefore);regSave(registryBefore);render();return}$('dPf').close();render()};
 let wt=0;$('wipe').onclick=()=>{const b=$('wipe');if(!wt){b.textContent='Toca otra vez para borrar este perfil';wt=setTimeout(()=>{wt=0;b.textContent='Borrar este perfil y sus datos'},4000);return}clearTimeout(wt);wt=0;b.textContent='Borrar este perfil y sus datos';const id=PID;if(!removeProfile(id))return alert('No se pudo borrar todo el perfil de forma segura. No cierres la página e inténtalo de nuevo.');$('dPf').close();lock()};
-const render0=()=>{$('tips').innerHTML='';$('lst').innerHTML='';$('gl').innerHTML='';$('budgetList').innerHTML='';$('budgetCards').innerHTML='';$('budgetTable').innerHTML=''};
+const render0=()=>{$('coachIncome').hidden=true;$('coachIncome').textContent='';$('tips').innerHTML='';$('lst').innerHTML='';$('gl').innerHTML='';$('budgetList').innerHTML='';$('budgetCards').innerHTML='';$('budgetTable').innerHTML=''};
 function obShow(n){$('ob1').hidden=n!==1;$('ob2').hidden=n!==2;$('obSt').textContent='Paso '+n+' de 2 · '+(n===1?'Cuéntanos sobre ti. Solo tu nombre es obligatorio; lo demás puedes cambiarlo después en Perfil.':'Tu dinero, tu primera meta y tu PIN (obligatorio).')}
 const obNext=()=>{if($('obN').reportValidity()&&$('obAg').reportValidity())obShow(2)};
 let obBusy=0;const obDone=async()=>{if(obBusy)return;if(!$('obN').value.trim())return obShow(1);const pn=$('obP').value;if(!pinOk(pn))return alert('Crea un PIN de 4 números');if(pn!==$('obP2').value)return alert('La confirmación del PIN no coincide');
 obBusy=1;try{if(await pinTaken(pn,null))return alert('Ese PIN ya está en uso por otro perfil. Elige uno distinto.');const id=newId();let h;try{h=await hashPin(pn)}catch(e){return alert(e.message)}const nm=$('obN').value.trim(),wb=$('obBio').checked,r=regLoad();setPid(id);
-S.profile=normP({id,username:nm,pref:$('obPn').value.trim(),age:+$('obAg').value||'',gender:$('obGe').value,coach:$('obCs').value,initialBalance:+$('obB').value||0,occ:$('obO').value,salary:+$('obS').value||0});S.tx=[];S.rec=[];S.goals=[];S.assets=[];S.liabs=[];S.cats=[];S.budgets=[];S.motifs=DM.slice();
+S.profile=normP({id,username:nm,pref:$('obPn').value.trim(),age:+$('obAg').value||'',gender:$('obGe').value,coach:$('obCs').value,incomeFrequency:$('obIf').value,initialBalance:+$('obB').value||0,occ:$('obO').value,salary:+$('obS').value||0});S.tx=[];S.rec=[];S.goals=[];S.assets=[];S.liabs=[];S.cats=[];S.budgets=[];S.motifs=DM.slice();
 const t=+$('obT').value,g=$('obG').value.trim();if(g&&t>0)S.goals.push({id:'g'+Date.now(),title:g,target:t});setSalary();autoPost();const entries=TB.map(k=>({key:pk(id,k),value:JSON.stringify(S[k])}));entries.push({key:PR_K,value:JSON.stringify([...r,{id,name:nm,pin:h,bio:null}])});if(!writeBatch(entries)){deleteBatch(TB.map(k=>pk(id,k)));setPid(null);hideData();return alert('No se pudo crear el perfil porque el navegador no confirmó todas las escrituras. No se ha activado el perfil; libera espacio e inténtalo de nuevo.')}$('dOb').close();document.body.classList.remove('locked');try{render()}catch(e){alert('Error: '+e.message)}
 if(wb){if(bioTaken())toast('La huella o el rostro ya está asociada a otro perfil');else enableBio().then(ok=>toast(ok?'Huella o rostro activado ✓':'No se pudo activar la huella o el rostro en este dispositivo'))}}finally{obBusy=0}};
 $('obGo').onclick=obDone;$('obNx').onclick=obNext;$('obBk').onclick=()=>obShow(1);$('fOb').onsubmit=e=>{e.preventDefault();$('ob1').hidden?obDone():obNext()};$('fOb').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();$('ob1').hidden?obDone():obNext()}});
@@ -432,7 +569,7 @@ $('lkP').value='';$('lkE').textContent='';$('lkPw').hidden=false;$('lkB').hidden
 function enter(id){setPid(id);S.profile=ld(K.profile,null);S.tx=ld(K.tx,[]);S.rec=ld(K.rec,[]);S.goals=ld(K.goals,[]);S.motifs=ld(K.motifs,DM.slice());S.assets=ld(K.assets,[]);S.liabs=ld(K.liabs,[]);S.cats=ld(K.cats,[]);S.budgets=cleanBudgets(ld(K.budgets,[]));
 if(!S.profile)S.profile={username:(regFind(id)||{}).name||'Perfil',initialBalance:0,occ:'estudiante',salary:0};normP(S.profile);S.profile.id=id;migCat();
 if($('dLk').open)$('dLk').close();document.body.classList.remove('locked');const h=document.querySelector('nav [data-go=home]');if(h)h.click();const before=snapshotState();autoPost();applyFixed();if(!save()){restoreState(before);render();return}render();resetIdle()}
-function startNew(){if($('dLk').open)$('dLk').close();hideData();['obN','obPn','obAg','obB','obG','obT','obS','obP','obP2'].forEach(x=>$(x).value='');$('obBio').checked=false;$('obGe').value='no';$('obCs').value='cercano';$('obO').value='estudiante';$('obO').onchange();obShow(1);$('obCa').textContent=regLoad().length?'Cancelar':'Atrás';$('obCa').hidden=false;if(!$('dOb').open)$('dOb').showModal()}
+function startNew(){if($('dLk').open)$('dLk').close();hideData();['obN','obPn','obAg','obB','obG','obT','obS','obP','obP2'].forEach(x=>$(x).value='');$('obBio').checked=false;$('obGe').value='no';$('obCs').value='cercano';$('obIf').value='irregular';$('obO').value='estudiante';$('obO').onchange();obShow(1);$('obCa').textContent=regLoad().length?'Cancelar':'Atrás';$('obCa').hidden=false;if(!$('dOb').open)$('dOb').showModal()}
 let npId=null;function needPin(p){npId=p.id;$('npT').textContent='Crea un PIN para «'+p.name+'»';$('npP').value=$('npP2').value='';if(!$('dNp').open)$('dNp').showModal()}
 $('dNp').addEventListener('cancel',e=>e.preventDefault());$('dOb').addEventListener('cancel',e=>e.preventDefault());
 $('npGo').onclick=async()=>{const a=$('npP').value;if(!pinOk(a))return alert('El PIN debe tener 4 números');if(a!==$('npP2').value)return alert('La confirmación del PIN no coincide');if(await pinTaken(a,npId))return alert('Ese PIN ya está en uso por otro perfil. Elige uno distinto.');let h;try{h=await hashPin(a)}catch(e){return alert(e.message)}const id=npId;if(!regUpd(id,p=>{p.pin=h}))return alert('No se pudo guardar el PIN. Comprueba el espacio disponible e inténtalo de nuevo.');npId=null;$('dNp').close();enter(id)};
