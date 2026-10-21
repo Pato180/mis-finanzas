@@ -83,6 +83,7 @@ body.locked header,body.locked main,body.locked nav,body.locked #toast{visibilit
 .note{background:#EEF2FF;color:#3730A3;border-radius:10px;padding:10px 12px;font-size:12.5px;margin-top:12px}.note.warn{background:#FFF7E0;color:#7A5200}
 .tw{overflow-x:auto}.bt3{width:100%;border-collapse:collapse;font-size:13.5px;min-width:430px}.bt3 th{text-align:left;color:var(--mut);font-weight:600;padding:8px 6px;border-bottom:1px solid var(--line)}.bt3 td{padding:9px 6px;border-bottom:1px solid var(--line)}.bt3 .r{text-align:right}
 #t-budgets .blk{--c:#F59E0B}
+#t-home .upcoming-item{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}#t-home .upcoming-item:last-child{border-bottom:0}#t-home .upcoming-date{min-width:52px;text-align:center;border-radius:10px;background:#E3E7FB;color:#3730A3;padding:6px 4px;font-size:12px;font-weight:700}#t-home .upcoming-main{flex:1;min-width:0}#t-home .upcoming-main b{display:block;overflow-wrap:anywhere}#t-home .upcoming-amount{font-weight:700;white-space:nowrap}#t-home .upcoming-amount.expense{color:var(--out)}#t-home .upcoming-amount.income{color:var(--in)}
 </style></head><body class="locked">
 <header><div style="display:flex;gap:12px;align-items:center"><img class="mascota" alt="" width="46" height="46"><div><small id="hi"></small><h1>Mis finanzas</h1></div></div><button class="btn sec" id="prof" aria-label="Perfil y ajustes">Perfil</button></header>
 <main>
@@ -92,6 +93,7 @@ body.locked header,body.locked main,body.locked nav,body.locked #toast{visibilit
 <div class="trio"><div><small>Ingresos</small><b class="in" id="sIn"></b></div><div><small>Egresos</small><b class="out" id="sOut"></b></div><div><small>Ahorrado en total</small><b class="sv" id="sSv"></b></div></div></div>
 <div class="blk"><h2>Tu coach</h2><div id="tips"></div></div>
 <div class="blk"><div class="hd"><h2>Presupuestos del mes</h2><button type="button" class="btn sec" id="newBudget">+ Crear</button></div><small>Controla cuánto quieres gastar por categoría. Los avisos no bloquean tus gastos.</small><div id="budgetList"></div><p class="note warn">⚠️ El cálculo usa solo los gastos que has registrado en la app durante el mes actual. No descuenta automáticamente movimientos que todavía no hayas registrado.</p></div>
+<div class="blk"><h2>Próximos pagos y cobros</h2><small>Fijos previstos para los próximos 30 días. Son estimaciones; no se registran ni descuentan del saldo hasta su fecha.</small><div id="upcomingList"></div></div>
 <div class="blk"><h2>Ingresos y egresos</h2><div class="ch"><canvas id="cBar"></canvas></div></div>
 <div class="blk"><h2>En qué gastas</h2><div class="ch"><canvas id="cPie"></canvas></div></div>
 </section>
@@ -280,9 +282,10 @@ const budgetClick=e=>{
 };
 $('budgetList').onclick=$('budgetCards').onclick=budgetClick;$('newBudget2').onclick=()=>openBudget();
 
+function renderUpcoming(){const items=MisFinanzasRecurrence.upcomingOccurrences(S.rec,ymd(new Date()),30,ymd);$('upcomingList').innerHTML=items.length?items.map(x=>{const d=new Date(x.date+'T00:00:00'),dateLabel=d.toLocaleDateString('es-EC',{day:'2-digit',month:'short'});return '<div class="upcoming-item"><span class="upcoming-date">'+esc(dateLabel)+'</span><div class="upcoming-main"><b>'+esc(x.description)+'</b><small>'+esc(x.type==='income'?'Cobro previsto':'Pago previsto')+(x.category?' · '+esc(x.category):'')+'</small></div><span class="upcoming-amount '+esc(x.type)+'">'+(x.type==='income'?'+':'−')+m(x.amount)+'</span></div>'}).join(''):'<p class="empty">No tienes pagos ni cobros fijos previstos para los próximos 30 días. Si tienes alguno, puedes registrarlo como fijo desde el botón +.</p>'}
 function render(){const P=S.profile,pl=S.tx.filter(x=>inP(x.date)),i=sum(pl,'income'),o=sum(pl,'expense');
 $('hi').textContent='Hola, '+dn(P);$('bal').textContent=m(bal());$('sIn').textContent=m(i);$('sOut').textContent=m(o);$('sSv').textContent=m(sum(S.tx,'save'));
-tips(pl,i,o);charts(pl);list();fixed();goals();renderBudgets()}
+tips(pl,i,o);charts(pl);list();fixed();goals();renderBudgets();renderUpcoming()}
 const sum1=a=>a.reduce((x,y)=>x+y,0);
 function tips(pl,i,o){const P=S.profile,nm=esc(dn(P)),vo=P.coach==='cercano'&&P.gender==='mujer'?'amiga':P.coach==='cercano'&&P.gender==='hombre'?'amigo':nm,Vo=vo.charAt(0).toUpperCase()+vo.slice(1),T=[],f=S.rec.filter(r=>r.type==='income').reduce((a,r)=>a+mo(r),0),fe=S.rec.filter(r=>r.type==='expense').reduce((a,r)=>a+mo(r),0),R=v=>m(Math.round(v)),
 ing=f>0?f:i,base=f>0?f-fe:i-o,W=S.tx.filter(x=>ymd(wk(new Date(x.date+'T00:00')))===ymd(wk(new Date()))),svT=sum(S.tx,'save');let sug=0;
