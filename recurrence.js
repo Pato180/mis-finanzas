@@ -110,7 +110,7 @@
 
   function upcomingOccurrences(rules, today, days, ymd) {
     const formatDate = ymd || defaultYmd;
-    if (typeof today !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(today)) return [];
+    if (typeof today !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(today)) return [];
     const span = Number.isInteger(days) && days >= 0 ? days : 30;
     const startDate = new Date(today + 'T00:00:00');
     const endDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + span);
@@ -134,7 +134,7 @@
       if (!rule || !['income', 'expense'].includes(rule.type)) return;
 
       if (rule.id === 'salary') {
-        if (typeof rule.since !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(rule.since)) return;
+        if (typeof rule.since !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(rule.since)) return;
         const posted = Array.isArray(rule.posted) ? rule.posted : [];
         const anchor = new Date(rule.since + 'T00:00:00');
         const lastMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
@@ -147,7 +147,7 @@
         return;
       }
 
-      if (typeof rule.start !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(rule.start)) return;
+      if (typeof rule.start !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(rule.start)) return;
       if (rule.frequency === 'weekly') {
         const anchor = new Date(rule.start + 'T00:00:00');
         const elapsed = Math.floor((startDate - anchor) / 86400000);
