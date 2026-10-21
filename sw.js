@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mis-finanzas-v4';
+const CACHE_NAME = 'mis-finanzas-v5';
 
 const FILES_TO_CACHE = [
   './',
@@ -21,7 +21,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))
+      Promise.all(keys.filter(key => key.startsWith('mis-finanzas-') && key !== CACHE_NAME).map(key => caches.delete(key)))
     ).then(() => self.clients.claim())
   );
 });
@@ -39,13 +39,14 @@ self.addEventListener('fetch', event => {
         new Promise((_, no) => setTimeout(() => no(new Error('timeout')), 4000))
       ])
         .then(res => {
-          if (res && res.ok) {
-            const copia = res.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copia));
-          }
+          if (!res || !res.ok) throw new Error('Respuesta de red no válida');
+          const copia = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copia).catch(() => {}));
           return res;
         })
-        .catch(() => caches.match('./index.html').then(hit => hit || caches.match('./')))
+        .catch(() => caches.open(CACHE_NAME).then(cache =>
+          cache.match('./index.html').then(hit => hit || cache.match('./'))
+        ))
     );
     return;
   }
@@ -53,18 +54,17 @@ self.addEventListener('fetch', event => {
   // Íconos, librerías (gráficos, Excel, PDF) y tipografías: se guardan la primera vez y luego funcionan sin internet.
   if (url.origin === self.location.origin || EXTERNOS.includes(url.hostname)) {
     event.respondWith(
-      caches.match(req).then(guardado => {
+      caches.open(CACHE_NAME).then(cache => cache.match(req).then(guardado => {
         const red = fetch(req)
           .then(res => {
-            if (res && res.ok) {
-              const copia = res.clone();
-              caches.open(CACHE_NAME).then(cache => cache.put(req, copia));
-            }
+            if (!res || !res.ok) throw new Error('Respuesta de red no válida');
+            const copia = res.clone();
+            cache.put(req, copia).catch(() => {});
             return res;
           })
           .catch(() => guardado);
         return guardado || red;
-      })
+      }))
     );
   }
 });
