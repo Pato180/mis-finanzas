@@ -189,4 +189,13 @@ assert.ok(generatedState.tx.every(item => item.rid === 'r-monthly' && item.fixed
 assert.equal(applyFixed(), 0, 'Aplicar dos veces no debe duplicar las mismas ocurrencias.');
 assert.equal(new Set(generatedState.tx.map(item => item.id)).size, generatedState.tx.length, 'Cada ocurrencia debe tener un identificador único.');
 
+const partiallyExisting = {
+  rec: [{ id: 'r-partial', type: 'expense', amount: 10, description: 'Servicio', frequency: 'monthly', start: '2026-01-31', last: null }],
+  tx: [{ id: 'existing-feb', type: 'expense', amount: 10, description: 'Servicio', date: '2026-02-28', fixed: true, rid: 'r-partial' }]
+};
+const applyWithExisting = runApplyFixed(partiallyExisting, ymd, catFor, FixedDate);
+assert.equal(applyWithExisting(), 3, 'Debe omitir una ocurrencia existente aunque el marcador last esté vacío.');
+assert.equal(partiallyExisting.tx.filter(item => item.date === '2026-02-28').length, 1, 'No debe duplicar una ocurrencia ya registrada.');
+assert.deepEqual(partiallyExisting.tx.map(item => item.date).sort(), ['2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30']);
+
 console.log('Pruebas correctas: cálculos, respaldos, fechas mensuales/semanales, fin de mes, años bisiestos, reprogramación y prevención de duplicados.');
