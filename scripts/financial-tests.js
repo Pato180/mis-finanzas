@@ -84,4 +84,44 @@ assert.equal(all.te, 45);
 assert.equal(all.ta, 20);
 assert.equal(all.fin, 185, 'El historial completo debe coincidir con el saldo acumulado.');
 
-console.log('Pruebas contables correctas: saldo inicial/final, arrastre mensual, mes sin movimientos, ahorros, metas, activos y pasivos.');
+const backupMatch = html.match(/function normalizeBackupData\(d\)\{[\s\S]*?(?=\nconst backupProfile=)/);
+assert.ok(backupMatch, 'No se encontró normalizeBackupData(d) en index.html.');
+const cleanBudgets = items => Array.isArray(items) ? items.map((item, i) => ({
+  id: String(item.id || ('b' + i)),
+  category: item.category.trim(),
+  amount: Number(item.amount)
+})) : [];
+const defaultMotifs = ['Almuerzo', 'Pasaje', 'Servicios básicos', 'Mesada'];
+const normalizeBackup = new Function('ymd', 'DM', 'cleanBudgets', 'd', backupMatch[0] + '\nreturn normalizeBackupData(d);');
+const validBackup = {
+  v: 2,
+  profile: { username: 'Prueba', initialBalance: '100', salary: '0', pin: 'no-debe-importarse' },
+  tx: [{ id: 'tx1', type: 'income', amount: '25.50', date: '2026-01-05', description: 'Pago' }],
+  rec: [], goals: [], motifs: ['Pago'], assets: [], liabs: [], cats: [],
+  budgets: [{ id: 'b1', category: 'Alimentación', amount: '50' }]
+};
+const normalized = normalizeBackup(ymd, defaultMotifs, cleanBudgets, validBackup);
+assert.ok(normalized.data, 'Un respaldo válido debe poder normalizarse.');
+assert.equal(normalized.data.tx.length, 1);
+assert.equal(normalized.data.tx[0].amount, 25.5, 'Los montos importados deben normalizarse a número.');
+assert.equal(normalized.data.profile.initialBalance, 100);
+assert.equal(normalized.data.profile.pin, undefined, 'El PIN nunca debe importarse desde el archivo.');
+assert.equal(normalized.data.budgets[0].amount, 50);
+
+const malformedBackup = {
+  ...validBackup,
+  tx: [
+    validBackup.tx[0],
+    { id: 'bad', type: 'expense', amount: 10, date: '2026-02-31', description: 'Fecha inválida' }
+  ]
+};
+const rejected = normalizeBackup(ymd, defaultMotifs, cleanBudgets, malformedBackup);
+assert.ok(rejected.error, 'Si un movimiento es inválido, se debe rechazar el respaldo completo.');
+assert.match(rejected.error, /No se importó nada/);
+
+const legacyBackup = normalizeBackup(ymd, defaultMotifs, cleanBudgets, { profile: { username: 'Perfil anterior' }, tx: [] });
+assert.ok(legacyBackup.data, 'Los respaldos antiguos sin listas opcionales deben seguir siendo compatibles.');
+assert.equal(legacyBackup.data.profile.initialBalance, 0);
+assert.deepEqual(legacyBackup.data.motifs, defaultMotifs);
+
+console.log('Pruebas correctas: consistencia contable y validación de respaldos completos sin descartar movimientos inválidos.');
