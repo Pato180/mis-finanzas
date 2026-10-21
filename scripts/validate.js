@@ -21,10 +21,11 @@ function requireFile(relativePath) {
 }
 
 const htmlPath = path.join(root, 'index.html');
+const recurrencePath = path.join(root, 'recurrence.js');
 const swPath = path.join(root, 'sw.js');
 const manifestPath = path.join(root, 'manifest.webmanifest');
 
-if (!requireFile('index.html') || !requireFile('sw.js') || !requireFile('manifest.webmanifest')) {
+if (!requireFile('index.html') || !requireFile('recurrence.js') || !requireFile('sw.js') || !requireFile('manifest.webmanifest')) {
   process.exit(1);
 }
 
@@ -60,6 +61,11 @@ if (!/<link\s+rel=["']manifest["']\s+href=["']manifest\.webmanifest["']/i.test(h
 
 if (!/serviceWorker\.register\(\s*['"](?:\.\/)?sw\.js['"]\s*\)/.test(html)) {
   fail('index.html no registra el service worker sw.js.');
+}
+
+const recurrenceTag = '<script src="./recurrence.js"></script>';
+if (!html.includes(recurrenceTag) || html.indexOf(recurrenceTag) > html.indexOf('<script>')) {
+  fail('index.html debe cargar recurrence.js antes del JavaScript principal.');
 }
 
 const scriptBlocks = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
@@ -101,6 +107,11 @@ if (!cacheMatch) {
       fail(`sw.js intenta precargar un archivo inexistente: ${cachedPath}`);
     }
   }
+}
+
+const recurrenceCheck = spawnSync(process.execPath, ['--check', recurrencePath], { encoding: 'utf8' });
+if (recurrenceCheck.status !== 0) {
+  fail(`Error de sintaxis en recurrence.js:\n${recurrenceCheck.stderr || recurrenceCheck.stdout}`);
 }
 
 const swCheck = spawnSync(process.execPath, ['--check', swPath], { encoding: 'utf8' });
