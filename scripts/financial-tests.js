@@ -124,4 +124,69 @@ assert.ok(legacyBackup.data, 'Los respaldos antiguos sin listas opcionales deben
 assert.equal(legacyBackup.data.profile.initialBalance, 0);
 assert.deepEqual(legacyBackup.data.motifs, defaultMotifs);
 
-console.log('Pruebas correctas: consistencia contable y validación de respaldos completos sin descartar movimientos inválidos.');
+const dateAtMonthMatch = html.match(/function dateAtMonth\(anchor,offset\)\{[\s\S]*?(?=\nfunction rescheduleRecurring)/);
+const rescheduleMatch = html.match(/function rescheduleRecurring\(previous,nextDate\)\{[\s\S]*?(?=\nfunction applyFixed)/);
+const applyFixedMatch = html.match(/function applyFixed\(\)\{[\s\S]*?(?=\nfunction apply\()/);
+assert.ok(dateAtMonthMatch, 'No se encontró dateAtMonth.');
+assert.ok(rescheduleMatch, 'No se encontró rescheduleRecurring.');
+assert.ok(applyFixedMatch, 'No se encontró applyFixed.');
+
+const dateAtMonth = new Function('ymd', dateAtMonthMatch[0] + '\nreturn dateAtMonth;')(ymd);
+assert.equal(dateAtMonth('2026-01-31', 1), '2026-02-28', 'Enero 31 debe pasar a febrero 28.');
+assert.equal(dateAtMonth('2024-01-31', 1), '2024-02-29', 'Debe respetar febrero en año bisiesto.');
+assert.equal(dateAtMonth('2026-01-31', 2), '2026-03-31', 'La fecha ancla debe recuperarse en meses largos.');
+assert.equal(dateAtMonth('2026-05-30', 1), '2026-06-30', 'No debe desbordar al mes siguiente.');
+
+const monthlyState = {
+  rec: [{ id: 'r-month', type: 'expense', amount: 40, description: 'Arriendo', frequency: 'monthly', start: '2026-01-31', last: '2026-04-30' }],
+  tx: [
+    { id: 'jan', type: 'expense', amount: 40, description: 'Arriendo', date: '2026-01-31', fixed: true, rid: 'r-month', category: 'Vivienda', reason: 'Casa', extraMeta: 'preservar' },
+    { id: 'feb', type: 'expense', amount: 40, description: 'Arriendo', date: '2026-02-28', fixed: true, rid: 'r-month' },
+    { id: 'mar', type: 'expense', amount: 40, description: 'Arriendo', date: '2026-03-31', fixed: true, rid: 'r-month' },
+    { id: 'apr', type: 'expense', amount: 40, description: 'Arriendo', date: '2026-04-30', fixed: true, rid: 'r-month' }
+  ]
+};
+const runReschedule = new Function('S', 'dateAtMonth', 'ymd', rescheduleMatch[0] + '\nreturn rescheduleRecurring;')(monthlyState, dateAtMonth, ymd);
+const editedMarch = { ...monthlyState.tx[2], date: '2026-03-30' };
+runReschedule(monthlyState.tx[2], editedMarch.date);
+monthlyState.tx[2] = editedMarch;
+assert.equal(monthlyState.tx[3].date, '2026-04-30', 'Editar una ocurrencia mensual debe reprogramar la siguiente sin desbordar el mes.');
+assert.equal(monthlyState.rec[0].start, '2026-01-30', 'El ancla de la periodicidad mensual debe ajustarse para futuras ocurrencias.');
+assert.equal(monthlyState.rec[0].last, '2026-04-30', 'El último periodo aplicado debe mantenerse actualizado.');
+assert.equal(monthlyState.tx[0].reason, 'Casa', 'Editar una ocurrencia no debe borrar el motivo histórico.');
+assert.equal(monthlyState.tx[0].extraMeta, 'preservar', 'Los metadatos adicionales deben conservarse.');
+
+const weeklyState = {
+  rec: [{ id: 'r-week', type: 'income', amount: 15, description: 'Mesada', frequency: 'weekly', start: '2026-03-03', last: '2026-03-24' }],
+  tx: [
+    { id: 'w1', type: 'income', amount: 15, description: 'Mesada', date: '2026-03-03', fixed: true, rid: 'r-week' },
+    { id: 'w2', type: 'income', amount: 15, description: 'Mesada', date: '2026-03-10', fixed: true, rid: 'r-week' },
+    { id: 'w3', type: 'income', amount: 15, description: 'Mesada', date: '2026-03-17', fixed: true, rid: 'r-week' },
+    { id: 'w4', type: 'income', amount: 15, description: 'Mesada', date: '2026-03-24', fixed: true, rid: 'r-week' }
+  ]
+};
+const runWeeklyReschedule = new Function('S', 'dateAtMonth', 'ymd', rescheduleMatch[0] + '\nreturn rescheduleRecurring;')(weeklyState, dateAtMonth, ymd);
+const editedWeek = { ...weeklyState.tx[1], date: '2026-03-12' };
+runWeeklyReschedule(weeklyState.tx[1], editedWeek.date);
+weeklyState.tx[1] = editedWeek;
+assert.equal(weeklyState.tx[2].date, '2026-03-19', 'Mover una ocurrencia semanal debe desplazar las siguientes por el mismo número de días.');
+assert.equal(weeklyState.tx[3].date, '2026-03-26');
+assert.equal(weeklyState.rec[0].start, '2026-03-05', 'El ancla semanal debe desplazarse con la ocurrencia editada.');
+
+class FixedDate extends Date {
+  constructor(...args) { super(...(args.length ? args : ['2026-04-30T12:00:00Z'])); }
+}
+const generatedState = {
+  rec: [{ id: 'r-monthly', type: 'expense', amount: 20, description: 'Internet', category: 'Servicios', sub: 'Hogar', reason: 'Factura', frequency: 'monthly', start: '2026-01-31', last: null }],
+  tx: []
+};
+const runApplyFixed = new Function('S', 'ymd', 'catFor', 'Date', applyFixedMatch[0] + '\nreturn applyFixed;');
+const catFor = (type, description) => ({ category: 'Otros', sub: '' });
+const applyFixed = runApplyFixed(generatedState, ymd, catFor, FixedDate);
+assert.equal(applyFixed(), 4, 'Debe generar cada vencimiento mensual hasta la fecha de hoy.');
+assert.deepEqual(generatedState.tx.map(item => item.date), ['2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30']);
+assert.ok(generatedState.tx.every(item => item.rid === 'r-monthly' && item.fixed && item.reason === 'Factura'), 'Cada ocurrencia debe conservar vínculo y motivo.');
+assert.equal(applyFixed(), 0, 'Aplicar dos veces no debe duplicar las mismas ocurrencias.');
+assert.equal(new Set(generatedState.tx.map(item => item.id)).size, generatedState.tx.length, 'Cada ocurrencia debe tener un identificador único.');
+
+console.log('Pruebas correctas: cálculos, respaldos, fechas mensuales/semanales, fin de mes, años bisiestos, reprogramación y prevención de duplicados.');
