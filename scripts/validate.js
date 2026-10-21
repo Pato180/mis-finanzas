@@ -89,6 +89,20 @@ if (scriptBlocks.length === 0) {
   }
 }
 
+const coachRequirements = [
+  [/function coachData\\(\\)/, 'index.html debe calcular los datos base del coach en una sola función.'],
+  [/function tips\\(pl,i,o\\)/, 'index.html debe incluir el evaluador de reglas del coach.'],
+  [/id=["']obIf["']/, 'El alta inicial debe preguntar la frecuencia de ingreso.'],
+  [/id=["']pfIf["']/, 'El perfil debe permitir editar la frecuencia de ingreso.'],
+  [/incomeFrequency/, 'La frecuencia de ingreso debe guardarse en el perfil.'],
+  [/id=["']coachIncome["']/, 'El Resumen debe mostrar por separado el ingreso previsto.'],
+  [/periodMoves<5/, 'El coach debe aplicar la prioridad de pocos movimientos al período actual.'],
+  [/MisFinanzasRecurrence\\.upcomingOccurrences/, 'El coach debe calcular ingresos y gastos futuros desde las reglas recurrentes.']
+];
+for (const [pattern, message] of coachRequirements) {
+  if (!pattern.test(html)) fail(message);
+}
+
 const sw = fs.readFileSync(swPath, 'utf8');
 if (!/key\.startsWith\(['"]mis-finanzas-['"]\)\s*&&\s*key\s*!==\s*CACHE_NAME/.test(sw)) {
   fail('El service worker debe eliminar únicamente las cachés antiguas de Mis Finanzas, no las de otras aplicaciones.');
