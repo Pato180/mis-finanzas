@@ -84,6 +84,12 @@ if (scriptBlocks.length === 0) {
 }
 
 const sw = fs.readFileSync(swPath, 'utf8');
+if (!/key\.startsWith\(['"]mis-finanzas-['"]\)\s*&&\s*key\s*!==\s*CACHE_NAME/.test(sw)) {
+  fail('El service worker debe eliminar únicamente las cachés antiguas de Mis Finanzas, no las de otras aplicaciones.');
+}
+if (!/caches\.open\(CACHE_NAME\)\.then\(cache\s*=>\s*cache\.match\(req\)/.test(sw)) {
+  fail('El service worker debe consultar la caché propia de Mis Finanzas para los recursos.');
+}
 const cacheMatch = sw.match(/const\s+FILES_TO_CACHE\s*=\s*\[([\s\S]*?)\]/);
 if (!cacheMatch) {
   fail('No se pudo identificar FILES_TO_CACHE en sw.js.');
