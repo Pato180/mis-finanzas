@@ -192,6 +192,21 @@ assert.equal(applyWithExisting(), 3, 'Debe omitir una ocurrencia existente aunqu
 assert.equal(partiallyExisting.tx.filter(item => item.date === '2026-02-28').length, 1, 'No debe duplicar una ocurrencia ya registrada.');
 assert.deepEqual(partiallyExisting.tx.map(item => item.date).sort(), ['2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30']);
 
+const upcoming = recurrence.upcomingOccurrences([
+  { id: 'weekly', type: 'expense', amount: 12, description: 'Pasajes', frequency: 'weekly', start: '2026-10-12', category: 'Transporte' },
+  { id: 'monthly', type: 'expense', amount: 40, description: 'Arriendo', frequency: 'monthly', start: '2026-10-12', category: 'Vivienda' },
+  { id: 'salary', type: 'income', amount: 500, description: 'Sueldo', frequency: 'monthly', since: '2026-10-15', posted: ['2026-10'] },
+  { id: 'old', type: 'expense', amount: 5, description: 'Antiguo', frequency: 'monthly', start: '2020-01-01' },
+  { id: 'bad', type: 'expense', amount: 9, description: 'Sin periodicidad', start: '2026-10-22' }
+], '2026-10-20', 30, ymd);
+assert.deepEqual(upcoming.map(item => [item.description, item.date, item.type]), [
+  ['Pasajes', '2026-10-26', 'expense'],
+  ['Arriendo', '2026-11-12', 'expense'],
+  ['Sueldo', '2026-11-15', 'income']
+], 'Debe mostrar solo ocurrencias futuras válidas dentro de los próximos 30 días y omitir cobros ya registrados.');
+assert.equal(upcoming[0].category, 'Transporte', 'Debe conservar la categoría para mostrarla en el resumen.');
+assert.equal(recurrence.upcomingOccurrences([], '2026-10-20', 30, ymd).length, 0, 'Sin reglas no debe haber próximos pagos.');
+
 const buildRecurringEdit = (...args) => recurrence.buildRecurringEdit(...args, ymd);
 const ruleBefore = { id: 'r-edit', description: 'Internet', amount: 25, frequency: 'monthly', start: '2026-01-31', last: '2026-10-31', category: 'Servicios', reason: 'Factura', customMeta: 'mantener' };
 const amountEdit = buildRecurringEdit(ruleBefore, 'Internet hogar', '30.50', 'monthly', '2026-01-31', 'monthly', '2026-01-31', '2026-10-20');
