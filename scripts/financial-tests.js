@@ -198,4 +198,19 @@ assert.equal(applyWithExisting(), 3, 'Debe omitir una ocurrencia existente aunqu
 assert.equal(partiallyExisting.tx.filter(item => item.date === '2026-02-28').length, 1, 'No debe duplicar una ocurrencia ya registrada.');
 assert.deepEqual(partiallyExisting.tx.map(item => item.date).sort(), ['2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30']);
 
-console.log('Pruebas correctas: cálculos, respaldos, fechas mensuales/semanales, fin de mes, años bisiestos, reprogramación y prevención de duplicados.');
+const editRuleMatch = html.match(/function buildRecurringEdit\(r,description,amount,frequency,start,originalFrequency,originalStart,today\)\{[\s\S]*?(?=\nfunction openRecEdit)/);
+assert.ok(editRuleMatch, 'No se encontró buildRecurringEdit.');
+const buildRecurringEdit = new Function('ymd', editRuleMatch[0] + '\nreturn buildRecurringEdit;')(ymd);
+const ruleBefore = { id: 'r-edit', description: 'Internet', amount: 25, frequency: 'monthly', start: '2026-01-31', last: '2026-10-31', category: 'Servicios', reason: 'Factura', customMeta: 'mantener' };
+const amountEdit = buildRecurringEdit(ruleBefore, 'Internet hogar', '30.50', 'monthly', '2026-01-31', 'monthly', '2026-01-31', '2026-10-20');
+assert.deepEqual(amountEdit, { description: 'Internet hogar', amount: 30.5, frequency: 'monthly', start: '2026-01-31' }, 'Editar monto y descripción no debe mover la fecha ancla.');
+const frequencyEdit = buildRecurringEdit(ruleBefore, 'Internet hogar', '30.50', 'weekly', '2026-01-31', 'monthly', '2026-01-31', '2026-10-20');
+assert.deepEqual(frequencyEdit, { description: 'Internet hogar', amount: 30.5, frequency: 'weekly', start: '2026-10-20' }, 'Cambiar periodicidad debe iniciar desde hoy si el usuario no escoge otra fecha.');
+const explicitStartEdit = buildRecurringEdit(ruleBefore, 'Internet hogar', 30.5, 'weekly', '2026-10-25', 'monthly', '2026-01-31', '2026-10-20');
+assert.equal(explicitStartEdit.start, '2026-10-25', 'Debe respetar la fecha de inicio que el usuario elija.');
+assert.ok(buildRecurringEdit(ruleBefore, 'Internet', 0, 'monthly', '2026-01-31', 'monthly', '2026-01-31', '2026-10-20').error, 'No debe aceptar montos cero.');
+assert.ok(buildRecurringEdit(ruleBefore, 'Internet', 25, 'yearly', '2026-01-31', 'monthly', '2026-01-31', '2026-10-20').error, 'No debe aceptar periodicidades desconocidas.');
+assert.equal(ruleBefore.customMeta, 'mantener', 'Preparar la edición no debe mutar ni descartar metadatos del objeto original.');
+assert.equal(ruleBefore.last, '2026-10-31', 'Preparar la edición no debe alterar el historial aplicado.');
+
+console.log('Pruebas correctas: cálculos, respaldos, fechas mensuales/semanales, fin de mes, años bisiestos, reprogramación, duplicados y edición segura de reglas recurrentes.');
