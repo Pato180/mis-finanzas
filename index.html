@@ -310,7 +310,8 @@ o3m:v=>`Te faltan <b>${v.falta}</b> para “${v.meta}”. Con lo que tienes hoy 
 l1:v=>`Gastaste ${v.pct}% menos que el período pasado. ¡Eso se nota! 🎉`,
 l2:v=>`Cerraste <b>${v.cat}</b> con <b>${v.rest}</b> de sobra. ¡Bien jugado!`,
 l3:v=>`¡Lo lograste! “${v.meta}” está completa. 💖`,
-ok:v=>`Todo en orden por ahora, ${v.n}: tienes <b>${v.libre}</b> libres. 💖`},
+ok:v=>`Todo en orden por ahora, ${v.n}: tienes <b>${v.libre}</b> libres. 💖`,
+repeat:v=>`Seguimos paso a paso, ${v.n}. Tu disponible es <b>${v.libre}</b>; revisa tus movimientos y la recomendación antes de decidir. 💖`,
 directo:{
 p0:v=>`Aún hay pocos datos. Registra tus movimientos unos días y te doy consejos con tus números.`,
 a1:v=>`Dinero libre: <b>${v.libre}</b>. Prioriza lo esencial hasta tu próximo ingreso.`,
@@ -328,7 +329,8 @@ o3m:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Hoy no alcanza.`,
 l1:v=>`Gasto variable: ${v.pct}% menos que el período anterior.`,
 l2:v=>`<b>${v.cat}</b>: cerrado dentro del presupuesto, sobran <b>${v.rest}</b>.`,
 l3:v=>`Meta “${v.meta}” completada.`,
-ok:v=>`Todo en orden. Libre: <b>${v.libre}</b>.`},
+ok:v=>`Todo en orden. Libre: <b>${v.libre}</b>.`,
+repeat:v=>`La recomendación anterior sigue en revisión. Disponible actual: <b>${v.libre}</b>. Comprueba tus movimientos antes de decidir.`,
 motivador:{
 p0:v=>`¡Hola, ${v.n}, arrancamos! Registra tus movimientos unos días y verás consejos hechos con tus números reales. 🌟`,
 a1:v=>`Toca ajustar: hoy no tienes dinero libre (<b>${v.libre}</b>). Si te enfocas en lo esencial, llegas a tu próximo ingreso. 💪`,
@@ -346,7 +348,8 @@ o3m:v=>`¡Ya casi! Te faltan <b>${v.falta}</b> para “${v.meta}”. Hoy aún no
 l1:v=>`¡Bajaste tu gasto ${v.pct}% frente al período pasado! ¡Sigue así! 🚀`,
 l2:v=>`¡Cerraste <b>${v.cat}</b> con <b>${v.rest}</b> de sobra! ¡Eso es tener el control! 🏅`,
 l3:v=>`¡Meta cumplida! “${v.meta}” está completa. ¡Lo lograste! 🏆`,
-ok:v=>`¡Todo en orden, ${v.n}! Tienes <b>${v.libre}</b> libres. ¡Sigue así! 🌟`},
+ok:v=>`¡Todo en orden, ${v.n}! Tienes <b>${v.libre}</b> libres. ¡Sigue así! 🌟`,
+repeat:v=>`¡Seguimos avanzando, ${v.n}! Tu disponible actual es <b>${v.libre}</b>. Revisa tus números antes de dar el siguiente paso. 🌟`,
 calmado:{
 p0:v=>`Hola, ${v.n}. Con calma, ve registrando tus movimientos. En unos días podré darte consejos con tus números reales.`,
 a1:v=>`Por ahora no queda dinero libre (<b>${v.libre}</b>). Puede ayudar dejar solo lo esencial hasta tu próximo ingreso.`,
@@ -364,7 +367,8 @@ o3m:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Hoy aún no alcanza; pued
 l1:v=>`Este período gastaste ${v.pct}% menos que el anterior. Buen ritmo.`,
 l2:v=>`Cerraste <b>${v.cat}</b> dentro de tu presupuesto, con <b>${v.rest}</b> de sobra.`,
 l3:v=>`Completaste “${v.meta}”. Un logro que vale la pena reconocer.`,
-ok:v=>`Todo está en orden por ahora. Tienes <b>${v.libre}</b> libres.`}};
+ok:v=>`Todo está en orden por ahora. Tienes <b>${v.libre}</b> libres.`,
+repeat:v=>`La recomendación anterior puede seguir siendo útil. Tu disponible actual es <b>${v.libre}</b>; puedes revisar tus movimientos con calma.`};
 // Cálculos base del coach (disponible, libre, ingreso por llegar, ritmo de gasto, proyección...). Todo sale de lo registrado de verdad.
 function coachData(){
 const now=new Date(),td=ymd(now),D=s=>new Date(s+'T00:00:00'),dd=(a,b)=>Math.round((D(b)-D(a))/864e5),add=(s,n)=>{const d=D(s);d.setDate(d.getDate()+n);return ymd(d)},
@@ -394,7 +398,7 @@ return{now,td,D,dd,add,freq,nx,dias,fijosP,pend,fd,start,vv,gd,disp,libre,colcho
 function tips(pl,i,o){const P=S.profile,st=CM[P.coach]||CM.cercano,nm=esc(dn(P)),Vo=P.coach==='cercano'&&P.gender==='mujer'?'Amiga':P.coach==='cercano'&&P.gender==='hombre'?'Amigo':nm,
 c=coachData(),A=[],out=[],e=esc,
 // Un mensaje = clase de color + texto del estilo elegido + botón opcional (label + acción).
-M=(k,id,v,b)=>({k,t:st[id](Object.assign({n:nm,Vo},v)),b}),
+M=(k,id,v,b)=>({k,id,t:st[id](Object.assign({n:nm,Vo,libre:m(c.libre)},v)),b}),
 // P0: pocos datos (menos de 5 movimientos o menos de 3 días de uso) → solo el mensaje de bienvenida.
 poco=c.periodMoves<5||c.usoDias<3;
 if(poco)out.push(M('','p0',{}));
@@ -443,6 +447,7 @@ if(l3)lg.push(M('g','l3',{meta:e(l3.g.title)}));
 if(al.length){out.push(al[0]);const x=op[0]||lg[0];if(x)out.push(x)}
 else{if(op[0])out.push(op[0]);if(lg[0])out.push(lg[0]);else if(op[1])out.push(op[1])}
 if(!out.length)out.push(M('g','ok',{libre:m(L)}))}
+try{const key='mf_coach_seen_v1_'+PID,now=Date.now(),seen=JSON.parse(localStorage.getItem(key)||'{}');out=out.map(t=>{if(!t.id)return t;const last=Number(seen[t.id])||0;if(last&&now-last<86400000)return {...t,t:st.repeat({n:nm,libre:m(c.libre)})};seen[t.id]=now;return t});localStorage.setItem(key,JSON.stringify(seen))}catch(e){}
 $('tips').innerHTML=out.map(t=>{const k=t.b?A.push(t.b.f)-1:-1;return'<div class="tip '+t.k+'">'+t.t+(t.b?' <button type="button" class="lnk" data-ca="'+k+'">'+t.b.l+'</button>':'')+'</div>'}).join('');
 $('tips').onclick=ev=>{const b=ev.target.closest('[data-ca]');if(b&&A[b.dataset.ca])A[b.dataset.ca]()}}
 function setSalary(){const P=S.profile,it=S.rec.find(r=>r.id==='salary');if(isW(P.occ)&&P.salary>0){if(it)it.amount=P.salary;else S.rec.push({id:'salary',type:'income',amount:P.salary,description:'Sueldo',frequency:'monthly',since:ymd(new Date()),posted:[]})}else S.rec=S.rec.filter(r=>r.id!=='salary')}
