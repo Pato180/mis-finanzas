@@ -372,7 +372,7 @@ inc=S.rec.filter(r=>r.type==='income'),wI=sum1(inc.filter(r=>r.frequency==='week
 // La frecuencia elegida por la persona manda. Solo perfiles antiguos sin esta preferencia usan una inferencia conservadora.
 freq=['semanal','mensual','irregular'].includes(S.profile.incomeFrequency)?S.profile.incomeFrequency:(!inc.length?'irregular':(wI>mI?'semanal':'mensual')),
 up=MisFinanzasRecurrence.upcomingOccurrences(S.rec,td,35,ymd),
-nx=freq==='irregular'?null:(up.find(x=>x.type==='income')||null),
+nx=freq==='irregular'?null:(up.find(x=>{const rule=S.rec.find(r=>String(r.id)===String(x.ruleId));return x.type==='income'&&rule&&rule.frequency===(freq==='semanal'?'weekly':'monthly')})||null),
 dias=nx?dd(td,nx.date):null,
 hor=nx?nx.date:add(td,30),
 fijosP=sum1(up.filter(x=>x.type==='expense'&&x.date<=hor).map(x=>x.amount)),
@@ -412,7 +412,7 @@ const wn=BD.filter(b=>b.st==='warn').sort((a,b)=>b.pct-a.pct)[0];
 if(wn)al.push(M('w','a4',{cat:e(wn.category),gas:m(wn.spent),lim:m(wn.limit),rest:m(wn.left),para:dayL>1?'para los próximos '+dayL+' días':'para hoy'},{l:'Ver presupuestos',f:()=>go('budgets')}));
 // A5: categoría con 5 o más movimientos y más del 40 % del gasto variable, sin presupuesto. No propone ningún tope: el monto lo elige la persona.
 const tv=sum1(c.vv.map(x=>x.amount)),cg={};c.vv.forEach(x=>{const k=x.category||'Otros gastos';(cg[k]=cg[k]||{t:0,n:0});cg[k].t+=x.amount;cg[k].n++});
-const t5=Object.entries(cg).filter(([k,v])=>!pm.some(b=>b.category===k)&&v.n>=5&&tv>0&&v.t/tv>.4).sort((a,b)=>b[1].t-a[1].t)[0];
+const t5=Object.entries(cg).filter(([k,v])=>!pm.some(b=>b.category===k&&Number(b.amount)>0)&&v.n>=5&&tv>0&&v.t/tv>.4).sort((a,b)=>b[1].t-a[1].t)[0];
 if(t5)al.push(M('w','a5',{cat:e(t5[0]),pct:Math.round(t5[1].t/tv*100),monto:m(t5[1].t)},{l:'Crear presupuesto',f:()=>{openBudget();const s=$('budgetCategory');if(s&&[...s.options].some(x=>x.value===t5[0]))s.value=t5[0]}}));
 // ---- Oportunidades (prioridad 2) ----
 const op=[],liq=L<=0||(c.proy!=null&&c.proy>L),fl=x=>Math.round(x*100)/100;
