@@ -201,9 +201,13 @@ const upcoming = recurrence.upcomingOccurrences([
 ], '2026-10-20', 30, ymd);
 assert.deepEqual(upcoming.map(item => [item.description, item.date, item.type]), [
   ['Pasajes', '2026-10-26', 'expense'],
+  ['Antiguo', '2026-11-01', 'expense'],
+  ['Pasajes', '2026-11-02', 'expense'],
+  ['Pasajes', '2026-11-09', 'expense'],
   ['Arriendo', '2026-11-12', 'expense'],
-  ['Sueldo', '2026-11-15', 'income']
-], 'Debe mostrar solo ocurrencias futuras válidas dentro de los próximos 30 días y omitir cobros ya registrados.');
+  ['Sueldo', '2026-11-15', 'income'],
+  ['Pasajes', '2026-11-16', 'expense']
+], 'Debe mostrar todas las ocurrencias futuras válidas dentro de los próximos 30 días y omitir cobros ya registrados.');
 assert.equal(upcoming[0].category, 'Transporte', 'Debe conservar la categoría para mostrarla en el resumen.');
 assert.equal(recurrence.upcomingOccurrences([], '2026-10-20', 30, ymd).length, 0, 'Sin reglas no debe haber próximos pagos.');
 
