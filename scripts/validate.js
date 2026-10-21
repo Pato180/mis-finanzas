@@ -97,7 +97,7 @@ const coachRequirements = [
   [/incomeFrequency/, 'La frecuencia de ingreso debe guardarse en el perfil.'],
   [/id=["']coachIncome["']/, 'El Resumen debe mostrar por separado el ingreso previsto.'],
   [/periodMoves<5/, 'El coach debe aplicar la prioridad de pocos movimientos al período actual.'],
-  [/MisFinanzasRecurrence\.upcomingOccurrences/, 'El coach debe calcular ingresos y gastos futuros desde las reglas recurrentes.']
+  [/MisFinanzasRecurrence\.upcomingOccurrences/, 'El coach debe calcular ingresos y gastos futuros desde las reglas recurrentes.'],
   [/86400000/, 'El coach debe evitar repetir mensajes en menos de 24 horas.'],
   [/repeat:v=>/, 'Cada estilo debe tener una variante alternativa para mensajes recientes.'],
 ];
