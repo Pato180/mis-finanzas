@@ -124,14 +124,8 @@ assert.ok(legacyBackup.data, 'Los respaldos antiguos sin listas opcionales deben
 assert.equal(legacyBackup.data.profile.initialBalance, 0);
 assert.deepEqual(legacyBackup.data.motifs, defaultMotifs);
 
-const dateAtMonthMatch = html.match(/function dateAtMonth\(anchor,offset\)\{[\s\S]*?(?=\nfunction rescheduleRecurring)/);
-const rescheduleMatch = html.match(/function rescheduleRecurring\(previous,nextDate\)\{[\s\S]*?(?=\nfunction applyFixed)/);
-const applyFixedMatch = html.match(/function applyFixed\(\)\{[\s\S]*?(?=\nfunction apply\()/);
-assert.ok(dateAtMonthMatch, 'No se encontró dateAtMonth.');
-assert.ok(rescheduleMatch, 'No se encontró rescheduleRecurring.');
-assert.ok(applyFixedMatch, 'No se encontró applyFixed.');
-
-const dateAtMonth = new Function('ymd', dateAtMonthMatch[0] + '\nreturn dateAtMonth;')(ymd);
+const recurrence = require(path.join(__dirname, '..', 'recurrence.js'));
+const dateAtMonth = (anchor, offset) => recurrence.dateAtMonth(anchor, offset, ymd);
 assert.equal(dateAtMonth('2026-01-31', 1), '2026-02-28', 'Enero 31 debe pasar a febrero 28.');
 assert.equal(dateAtMonth('2024-01-31', 1), '2024-02-29', 'Debe respetar febrero en año bisiesto.');
 assert.equal(dateAtMonth('2026-01-31', 2), '2026-03-31', 'La fecha ancla debe recuperarse en meses largos.');
@@ -146,9 +140,9 @@ const monthlyState = {
     { id: 'apr', type: 'expense', amount: 40, description: 'Arriendo', date: '2026-04-30', fixed: true, rid: 'r-month' }
   ]
 };
-const runReschedule = new Function('S', 'dateAtMonth', 'ymd', rescheduleMatch[0] + '\nreturn rescheduleRecurring;')(monthlyState, dateAtMonth, ymd);
+const runReschedule = (state, previous, nextDate) => recurrence.rescheduleRecurring(state, previous, nextDate, ymd);
 const editedMarch = { ...monthlyState.tx[2], date: '2026-03-30' };
-runReschedule(monthlyState.tx[2], editedMarch.date);
+runReschedule(monthlyState, monthlyState.tx[2], editedMarch.date);
 monthlyState.tx[2] = editedMarch;
 assert.equal(monthlyState.tx[3].date, '2026-04-30', 'Editar una ocurrencia mensual debe reprogramar la siguiente sin desbordar el mes.');
 assert.equal(monthlyState.rec[0].start, '2026-01-30', 'El ancla de la periodicidad mensual debe ajustarse para futuras ocurrencias.');
@@ -165,9 +159,9 @@ const weeklyState = {
     { id: 'w4', type: 'income', amount: 15, description: 'Mesada', date: '2026-03-24', fixed: true, rid: 'r-week' }
   ]
 };
-const runWeeklyReschedule = new Function('S', 'dateAtMonth', 'ymd', rescheduleMatch[0] + '\nreturn rescheduleRecurring;')(weeklyState, dateAtMonth, ymd);
+const runWeeklyReschedule = (state, previous, nextDate) => recurrence.rescheduleRecurring(state, previous, nextDate, ymd);
 const editedWeek = { ...weeklyState.tx[1], date: '2026-03-12' };
-runWeeklyReschedule(weeklyState.tx[1], editedWeek.date);
+runWeeklyReschedule(weeklyState, weeklyState.tx[1], editedWeek.date);
 weeklyState.tx[1] = editedWeek;
 assert.equal(weeklyState.tx[2].date, '2026-03-19', 'Mover una ocurrencia semanal debe desplazar las siguientes por el mismo número de días.');
 assert.equal(weeklyState.tx[3].date, '2026-03-26');
@@ -180,9 +174,9 @@ const generatedState = {
   rec: [{ id: 'r-monthly', type: 'expense', amount: 20, description: 'Internet', category: 'Servicios', sub: 'Hogar', reason: 'Factura', frequency: 'monthly', start: '2026-01-31', last: null }],
   tx: []
 };
-const runApplyFixed = new Function('S', 'ymd', 'catFor', 'Date', applyFixedMatch[0] + '\nreturn applyFixed;');
 const catFor = (type, description) => ({ category: 'Otros', sub: '' });
-const applyFixed = runApplyFixed(generatedState, ymd, catFor, FixedDate);
+const runApplyFixed = (state, now) => () => recurrence.applyFixed(state, catFor, ymd, now);
+const applyFixed = runApplyFixed(generatedState, new FixedDate());
 assert.equal(applyFixed(), 4, 'Debe generar cada vencimiento mensual hasta la fecha de hoy.');
 assert.deepEqual(generatedState.tx.map(item => item.date), ['2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30']);
 assert.ok(generatedState.tx.every(item => item.rid === 'r-monthly' && item.fixed && item.reason === 'Factura'), 'Cada ocurrencia debe conservar vínculo y motivo.');
@@ -193,14 +187,12 @@ const partiallyExisting = {
   rec: [{ id: 'r-partial', type: 'expense', amount: 10, description: 'Servicio', frequency: 'monthly', start: '2026-01-31', last: null }],
   tx: [{ id: 'existing-feb', type: 'expense', amount: 10, description: 'Servicio', date: '2026-02-28', fixed: true, rid: 'r-partial' }]
 };
-const applyWithExisting = runApplyFixed(partiallyExisting, ymd, catFor, FixedDate);
+const applyWithExisting = runApplyFixed(partiallyExisting, new FixedDate());
 assert.equal(applyWithExisting(), 3, 'Debe omitir una ocurrencia existente aunque el marcador last esté vacío.');
 assert.equal(partiallyExisting.tx.filter(item => item.date === '2026-02-28').length, 1, 'No debe duplicar una ocurrencia ya registrada.');
 assert.deepEqual(partiallyExisting.tx.map(item => item.date).sort(), ['2026-01-31', '2026-02-28', '2026-03-31', '2026-04-30']);
 
-const editRuleMatch = html.match(/function buildRecurringEdit\(r,description,amount,frequency,start,originalFrequency,originalStart,today\)\{[\s\S]*?(?=\nfunction openRecEdit)/);
-assert.ok(editRuleMatch, 'No se encontró buildRecurringEdit.');
-const buildRecurringEdit = new Function('ymd', editRuleMatch[0] + '\nreturn buildRecurringEdit;')(ymd);
+const buildRecurringEdit = (...args) => recurrence.buildRecurringEdit(...args, ymd);
 const ruleBefore = { id: 'r-edit', description: 'Internet', amount: 25, frequency: 'monthly', start: '2026-01-31', last: '2026-10-31', category: 'Servicios', reason: 'Factura', customMeta: 'mantener' };
 const amountEdit = buildRecurringEdit(ruleBefore, 'Internet hogar', '30.50', 'monthly', '2026-01-31', 'monthly', '2026-01-31', '2026-10-20');
 assert.deepEqual(amountEdit, { description: 'Internet hogar', amount: 30.5, frequency: 'monthly', start: '2026-01-31' }, 'Editar monto y descripción no debe mover la fecha ancla.');
