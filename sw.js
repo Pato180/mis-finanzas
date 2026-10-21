@@ -1,8 +1,9 @@
-const CACHE_NAME = 'mis-finanzas-v5';
+const CACHE_NAME = 'mis-finanzas-v6';
 
 const FILES_TO_CACHE = [
   './',
   './index.html',
+  './recurrence.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png'
