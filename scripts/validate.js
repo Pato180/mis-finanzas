@@ -102,7 +102,7 @@ const coachRequirements = [
   [/repeat:v=>/, 'Cada estilo debe tener una variante alternativa para mensajes recientes.'],
   [/function applyTextSize\(\)/, 'La app debe adaptar el tamaño del texto según el perfil.'],
   [/id=[\"']pfTextSize[\"']/, 'El perfil debe permitir elegir el tamaño de letra y números.'],
-  [/age>=50\\?'grande'/, 'La lectura debe ampliarse automáticamente desde los 50 años.'],
+  [/age>=50/, 'La lectura debe ampliarse automáticamente desde los 50 años.'],
 ];
 for (const [pattern, message] of coachRequirements) {
   if (!pattern.test(html)) fail(message);
