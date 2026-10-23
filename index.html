@@ -270,6 +270,37 @@ body[data-theme] nav .fab{background:transparent!important;color:var(--ink)!impo
 body[data-theme] nav .bubble{background:var(--card)!important;border-color:var(--line)!important}
 body[data-theme] .pfill{background:linear-gradient(90deg,var(--btn1),var(--sv))!important}
 
+
+/* ===== Ajustes finales de paleta y burbuja inferior ===== */
+body[data-theme] .hero .top select#per{
+  background:var(--tile2)!important;
+  color:var(--ink)!important;
+  border:1px solid var(--line)!important;
+}
+body[data-theme] .duo>.sec+.sec{
+  border-left-color:var(--sv)!important;
+}
+body[data-theme] .hl{
+  border-top-color:var(--sv)!important;
+}
+body[data-theme] .hl::before,
+body[data-theme] .hl::after{
+  background:var(--sv)!important;
+}
+/* El contenedor de la burbuja no debe dibujar un cuadrado: solo se ve el círculo interior. */
+body[data-theme] nav .bubble{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+}
+body[data-theme] nav .bubble i{
+  background:var(--card)!important;
+  border:1px solid var(--line)!important;
+  border-radius:50%!important;
+  box-shadow:0 6px 16px #3C1E5040!important;
+}
+
 </style></head><body class="locked">
 <header><div style="display:flex;gap:12px;align-items:center"><img class="mascota" alt="" width="46" height="46"><div><small id="hi"></small><h1>Mis finanzas</h1></div></div><button class="btn sec" id="prof" aria-label="Perfil y ajustes">Perfil</button></header>
 <main>
