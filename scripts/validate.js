@@ -109,7 +109,10 @@ const fullThemeRequirements = [
   [/body\[data-theme\] nav::before\{background:linear-gradient/, 'La barra de navegación inferior debe respetar la paleta.'],
   [/body\[data-theme\] \.bar\.ok i/, 'Las barras de progreso deben respetar la paleta.'],
   [/body\[data-theme\] \.hero \.trio>div:nth-child\(3\)/, 'Las tarjetas de ingresos, egresos y ahorro deben respetar la paleta.'],
-  [/mis-finanzas-v13/, 'La caché debe actualizarse tras el arreglo visual.'],
+  [/mis-finanzas-v14/, 'La caché debe actualizarse tras el arreglo visual.'],
+  [/function autoCategoryFromMotif\(\)/, 'El motivo debe asignar categoría y subcategoría automáticamente.'],
+  [/S\.tx\.slice\(\)\.reverse\(\)\.find\(x=>x\.type===tt&&x\.category&&nz\(x\.description\)===key\)/, 'La app debe reutilizar la categoría elegida para un motivo anterior idéntico.'],
+  [/dispatchEvent\(new Event\('input'/, 'Los motivos sugeridos deben activar la asignación automática.'],
 
   [/Ajustes finales de paleta y burbuja inferior/, 'Los últimos ajustes de paleta y navegación deben estar presentes.'],
   [/body\[data-theme\] \.hero \.top select#per/, 'El selector Este mes debe respetar la paleta.'],
