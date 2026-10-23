@@ -227,6 +227,49 @@ body[data-theme="lavender"]{--bg:#F5F1FB;--card:#FFFFFF;--ink:#51476B;--mut:#827
 body[data-theme="lilac"]{--bg:#F7F1FA;--card:#FFFFFF;--ink:#5A456B;--mut:#8B7898;--line:#E7DCEC;--in:#A18AB7;--out:#B58FAF;--sv:#C0A4D8;--soft:#EEE2F5;--soft2:#F5ECF8}
 body[data-theme="peach"]{--bg:#FFF4EE;--card:#FFFFFF;--ink:#6D4E43;--mut:#987D70;--line:#F0DFD5;--in:#D99B7D;--out:#C98782;--sv:#E8B59B;--soft:#F8E5DA;--soft2:#FCF0E8}
 body[data-theme="nude"]{--bg:#F7F2ED;--card:#FFFEFC;--ink:#5E5148;--mut:#8B7D72;--line:#E7DDD3;--in:#B49A82;--out:#B88D8B;--sv:#D2B9A1;--soft:#EEE4DA;--soft2:#F4ECE4}
+
+/* ===== Aplicar la paleta elegida a TODA la interfaz ===== */
+body[data-theme="original"]{--tile1:#E0BBE4;--tile2:#A78BD8;--tile3:#E6D7F6;--nav1:#DECBDF;--nav2:#A788AA;--nav3:#8F7193;--btn1:#A68AD4;--btn2:#8F7193}
+body[data-theme="blue"]{--tile1:#D8E8F8;--tile2:#BFD7EF;--tile3:#EAF2FB;--nav1:#D8E8F8;--nav2:#8FB5DA;--nav3:#4776A5;--btn1:#8FB5DA;--btn2:#5D8DB8}
+body[data-theme="gray"]{--tile1:#E0E4E8;--tile2:#CCD2D9;--tile3:#EEF0F3;--nav1:#E0E4E8;--nav2:#A3AFBA;--nav3:#647485;--btn1:#A3AFBA;--btn2:#647485}
+body[data-theme="red"]{--tile1:#F5DCE2;--tile2:#EBC8D0;--tile3:#F8E9EC;--nav1:#F5DCE2;--nav2:#D99AA9;--nav3:#B65F75;--btn1:#D99AA9;--btn2:#B65F75}
+body[data-theme="brown"]{--tile1:#F0E1D1;--tile2:#E5D0BA;--tile3:#F5EDE5;--nav1:#F0E1D1;--nav2:#CBB08F;--nav3:#9B7B5A;--btn1:#CBB08F;--btn2:#9B7B5A}
+body[data-theme="green"]{--tile1:#DCEBDD;--tile2:#C9E0CC;--tile3:#EDF4EE;--nav1:#DCEBDD;--nav2:#A0C8A8;--nav3:#629876;--btn1:#A0C8A8;--btn2:#629876}
+body[data-theme="rose-millennial"]{--tile1:#F6DDE9;--tile2:#F0C8DC;--tile3:#FAECF2;--nav1:#F6DDE9;--nav2:#E3A0C4;--nav3:#BD6E98;--btn1:#E3A0C4;--btn2:#BD6E98}
+body[data-theme="rose-old"]{--tile1:#F0DCDD;--tile2:#E7C9CD;--tile3:#F7EBEC;--nav1:#F0DCDD;--nav2:#D1A0A8;--nav3:#A96A77;--btn1:#D1A0A8;--btn2:#A96A77}
+body[data-theme="lavender"]{--tile1:#E6DFF6;--tile2:#D8CDF0;--tile3:#F1ECFA;--nav1:#E6DFF6;--nav2:#B9ABE2;--nav3:#8977BD;--btn1:#B9ABE2;--btn2:#8977BD}
+body[data-theme="lilac"]{--tile1:#EADCF3;--tile2:#DDC9EC;--tile3:#F5ECF8;--nav1:#EADCF3;--nav2:#C3A3DD;--nav3:#986DB7;--btn1:#C3A3DD;--btn2:#986DB7}
+body[data-theme="peach"]{--tile1:#F9E0D2;--tile2:#F4CFBC;--tile3:#FCF0E8;--nav1:#F9E0D2;--nav2:#E7AE91;--nav3:#C77E63;--btn1:#E7AE91;--btn2:#C77E63}
+body[data-theme="nude"]{--tile1:#EDE0D3;--tile2:#E4D3C3;--tile3:#F4ECE4;--nav1:#EDE0D3;--nav2:#CEB7A3;--nav3:#A88A70;--btn1:#CEB7A3;--btn2:#A88A70}
+body[data-theme] .hero{background:linear-gradient(135deg,var(--btn1),var(--btn2))!important;color:var(--ink)}
+body[data-theme] .hero small,body[data-theme] .hero .top>small{color:var(--ink)!important;opacity:.82}
+body[data-theme] .hero .trio>div:nth-child(1){background:var(--tile1)!important}
+body[data-theme] .hero .trio>div:nth-child(2){background:var(--tile2)!important}
+body[data-theme] .hero .trio>div:nth-child(3){background:var(--tile3)!important}
+body[data-theme] .hero .trio small,body[data-theme] .hero .trio b{color:var(--ink)!important}
+body[data-theme] .hero .trio .in,body[data-theme] .hero .trio .out,body[data-theme] .hero .trio .sv{color:var(--ink)!important}
+body[data-theme] .blk{border-color:var(--line)!important;border-top-color:var(--sv)!important}
+body[data-theme] .btn:not(.sec){background:linear-gradient(135deg,var(--btn1),var(--btn2))!important;color:#fff!important}
+body[data-theme] .btn.sec,body[data-theme] header .btn.sec{background:var(--soft)!important;color:var(--ink)!important;border-color:var(--line)!important}
+body[data-theme] .chips button,body[data-theme] .f button,body[data-theme] .act button{background:var(--soft)!important;color:var(--ink)!important}
+body[data-theme] .f button.on{background:var(--sv)!important;color:#fff!important}
+body[data-theme] .seg{background:var(--soft)!important}
+body[data-theme] .seg button.on{background:var(--card)!important;color:var(--ink)!important}
+body[data-theme] .bar{background:var(--soft)!important}
+body[data-theme] .bar i{background:linear-gradient(90deg,var(--btn1),var(--sv))!important}
+body[data-theme] .bar.ok i,body[data-theme] .bar.warn i,body[data-theme] .bar.over i{background:linear-gradient(90deg,var(--btn1),var(--sv))!important}
+body[data-theme] .bpill.ok,body[data-theme] .bpill.warn,body[data-theme] .bpill.over{background:var(--soft)!important;color:var(--ink)!important}
+body[data-theme] .note,body[data-theme] .note.warn{background:var(--soft2)!important;color:var(--ink)!important}
+body[data-theme] .upcoming-date{background:var(--soft)!important;color:var(--ink)!important}
+body[data-theme] .dot{background:var(--soft2)!important}
+body[data-theme] .lnk,body[data-theme] #toast button{color:var(--sv)!important}
+body[data-theme] nav::before{background:linear-gradient(145deg,var(--nav1),var(--nav2) 55%,var(--nav3))!important;clip-path:polygon(0 24%,12% 15%,26% 27%,42% 17%,57% 25%,72% 14%,86% 20%,100% 13%,100% 100%,0 100%)}
+body[data-theme] nav button{color:var(--ink)!important}
+body[data-theme] nav button.on svg{color:var(--sv)!important}
+body[data-theme] nav .fab{background:transparent!important;color:var(--ink)!important}
+body[data-theme] nav .bubble{background:var(--card)!important;border-color:var(--line)!important}
+body[data-theme] .pfill{background:linear-gradient(90deg,var(--btn1),var(--sv))!important}
+
 </style></head><body class="locked">
 <header><div style="display:flex;gap:12px;align-items:center"><img class="mascota" alt="" width="46" height="46"><div><small id="hi"></small><h1>Mis finanzas</h1></div></div><button class="btn sec" id="prof" aria-label="Perfil y ajustes">Perfil</button></header>
 <main>

@@ -103,6 +103,18 @@ for (const [pattern, message] of accessibilityRequirements) {
 }
 
 
+const fullThemeRequirements = [
+  [/Aplicar la paleta elegida a TODA la interfaz/, 'Los temas deben incluir estilos globales para los componentes.'],
+  [/body\[data-theme\] \.hero\{background:linear-gradient/, 'El cuadro de disponible debe respetar la paleta.'],
+  [/body\[data-theme\] nav::before\{background:linear-gradient/, 'La barra de navegación inferior debe respetar la paleta.'],
+  [/body\[data-theme\] \.bar\.ok i/, 'Las barras de progreso deben respetar la paleta.'],
+  [/body\[data-theme\] \.hero \.trio>div:nth-child\(3\)/, 'Las tarjetas de ingresos, egresos y ahorro deben respetar la paleta.'],
+  [/mis-finanzas-v12/, 'La caché debe actualizarse tras el arreglo visual.'],
+];
+for (const [pattern, message] of fullThemeRequirements) {
+  if (!pattern.test(html + fs.readFileSync(swPath, 'utf8'))) fail(message);
+}
+
 const themeRequirements = [
   [/id=["']pfColorTheme["']/, 'El perfil debe permitir elegir una paleta de colores.'],
   [/function applyTheme\(\)/, 'La app debe aplicar una paleta según el perfil.'],
