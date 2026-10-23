@@ -109,7 +109,12 @@ const fullThemeRequirements = [
   [/body\[data-theme\] nav::before\{background:linear-gradient/, 'La barra de navegación inferior debe respetar la paleta.'],
   [/body\[data-theme\] \.bar\.ok i/, 'Las barras de progreso deben respetar la paleta.'],
   [/body\[data-theme\] \.hero \.trio>div:nth-child\(3\)/, 'Las tarjetas de ingresos, egresos y ahorro deben respetar la paleta.'],
-  [/mis-finanzas-v12/, 'La caché debe actualizarse tras el arreglo visual.'],
+  [/mis-finanzas-v13/, 'La caché debe actualizarse tras el arreglo visual.'],
+
+  [/Ajustes finales de paleta y burbuja inferior/, 'Los últimos ajustes de paleta y navegación deben estar presentes.'],
+  [/body\[data-theme\] \.hero \.top select#per/, 'El selector Este mes debe respetar la paleta.'],
+  [/body\[data-theme\] \.hl::before/, 'Las líneas decorativas bajo los títulos deben respetar la paleta.'],
+  [/body\[data-theme\] nav \.bubble\{\s*background:transparent!important/, 'La burbuja de navegación debe conservar su forma circular.'],
 ];
 for (const [pattern, message] of fullThemeRequirements) {
   if (!pattern.test(html + fs.readFileSync(swPath, 'utf8'))) fail(message);
