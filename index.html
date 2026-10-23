@@ -732,7 +732,7 @@ document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(
 $('per').onchange=e=>{S.per=e.target.value;render()};$('q').oninput=$('mSel').oninput=$('aMin').oninput=$('aMax').oninput=list;
 $('flt').onclick=e=>{const f=e.target.dataset.f;if(!f)return;S.flt=f;document.querySelectorAll('#flt button').forEach(b=>b.classList.toggle('on',b.dataset.f===f));list()};
 $('lst').onclick=e=>{const r=e.target.closest('.row');if(!r)return;if(e.target.dataset.e!==undefined){const t=S.tx.find(x=>String(x.id)===String(r.dataset.id));return t&&t.type==='save'?openSave(null,null,t.id):openTx(r.dataset.id)}if(e.target.dataset.d!==undefined)return del(r.dataset.id);r.classList.toggle('open')};
-document.querySelector('#dTx .seg').onclick=e=>{if(e.target.dataset.t)setType(e.target.dataset.t)};
+document.querySelector('#dTx .seg').onclick=e=>{if(e.target.dataset.t){autoCategoryApplied=false;setType(e.target.dataset.t)}};
 $('motC').onclick=e=>{if(e.target.tagName==='BUTTON'){$('txM').value=e.target.textContent;$('txM').dispatchEvent(new Event('input',{bubbles:true}))}};
 $('fTx').onsubmit=e=>{e.preventDefault();const before=budgetSnap(),d=$('txM').value.trim(),previous=eid?S.tx.find(t=>String(t.id)===String(eid)):null;if(eid&&!previous)return toast('No encontré este movimiento. Cierra el formulario y vuelve a abrirlo.');
 // Al editar, conservar el objeto completo y sobrescribir únicamente los campos del formulario.
