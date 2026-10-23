@@ -94,7 +94,7 @@ const accessibilityRequirements = [
   [/age-readable-50/, 'La app debe aumentar el texto desde los 50 años.'],
   [/age-readable-60/, 'La app debe aumentar más el texto desde los 60 años.'],
   [/age-readable-70/, 'La app debe aumentar más el texto desde los 70 años.'],
-  [/function applyTextSize\\(\\)/, 'El tamaño debe actualizarse según la edad y preferencia del perfil activo.'],
+  [/function applyTextSize\(\)/, 'El tamaño debe actualizarse según la edad y preferencia del perfil activo.'],
   [/id=[\"']pfTextSize[\"']/, 'El perfil debe permitir elegir un tamaño de texto accesible.'],
   [/textSize/, 'La preferencia de tamaño debe guardarse en el perfil.'],
 ];
