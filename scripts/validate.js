@@ -102,6 +102,20 @@ for (const [pattern, message] of accessibilityRequirements) {
   if (!pattern.test(html)) fail(message);
 }
 
+
+const themeRequirements = [
+  [/id=["']pfColorTheme["']/, 'El perfil debe permitir elegir una paleta de colores.'],
+  [/function applyTheme\(\)/, 'La app debe aplicar una paleta según el perfil.'],
+  [/colorTheme/, 'La preferencia de color debe guardarse por perfil.'],
+  [/THEME_PALETTES/, 'Los gráficos y categorías deben respetar la paleta seleccionada.'],
+  [/body\[data-theme="blue"\]/, 'Debe existir una paleta azul pastel.'],
+  [/value="rose-millennial"/, 'Debe incluir la paleta rosa millennial.'],
+  [/value="lavender"/, 'Debe incluir la paleta lavanda.'],
+];
+for (const [pattern, message] of themeRequirements) {
+  if (!pattern.test(html)) fail(message);
+}
+
 const coachRequirements = [
   [/function coachData\(\)/, 'index.html debe calcular los datos base del coach en una sola función.'],
   [/function tips\(pl,i,o\)/, 'index.html debe incluir el evaluador de reglas del coach.'],
