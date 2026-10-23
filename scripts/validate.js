@@ -100,7 +100,7 @@ const coachRequirements = [
   [/MisFinanzasRecurrence\.upcomingOccurrences/, 'El coach debe calcular ingresos y gastos futuros desde las reglas recurrentes.'],
   [/86400000/, 'El coach debe evitar repetir mensajes en menos de 24 horas.'],
   [/repeat:v=>/, 'Cada estilo debe tener una variante alternativa para mensajes recientes.'],
-  [/function applyTextSize\\(\\)/, 'La app debe adaptar el tamaño del texto según el perfil.'],
+  [/function applyTextSize\(\)/, 'La app debe adaptar el tamaño del texto según el perfil.'],
   [/id=[\"']pfTextSize[\"']/, 'El perfil debe permitir elegir el tamaño de letra y números.'],
   [/age>=50\\?'grande'/, 'La lectura debe ampliarse automáticamente desde los 50 años.'],
 ];
