@@ -175,6 +175,45 @@ nav .fab:active svg{transform:scale(.82) rotate(90deg)}
 .bubble.go i{animation:burbuja .62s ease}
 @keyframes burbuja{0%{transform:scale(1)}30%{transform:scale(1.22,.84)}62%{transform:scale(.93,1.08)}100%{transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.bubble.ready{transition:none}.bubble.go i{animation:none}nav button svg{transition:none}.coachcat{animation:none}.pfill{transition:none}}
+
+/* ===== Accesibilidad: texto más legible según la edad del perfil activo ===== */
+body.age-readable-50{font-size:16px}
+body.age-readable-50 small{font-size:14px}
+body.age-readable-50 label{font-size:15px}
+body.age-readable-50 input,body.age-readable-50 select,body.age-readable-50 textarea{font-size:16px;min-height:46px}
+body.age-readable-50 button{font-size:15px}
+body.age-readable-50 h2{font-size:19px}
+body.age-readable-50 h3{font-size:15px}
+body.age-readable-50 .tip,body.age-readable-50 .note,body.age-readable-50 .income-pending{font-size:15px}
+body.age-readable-50 .amt,body.age-readable-50 .rm b,body.age-readable-50 .fr span,body.age-readable-50 .trio b{font-size:1.12em}
+body.age-readable-50 .big{font-size:clamp(50px,14vw,76px)}
+body.age-readable-50 .big2{font-size:38px}
+body.age-readable-50 nav button{font-size:13px;min-height:44px}
+body.age-readable-60{font-size:17px}
+body.age-readable-60 small{font-size:15px}
+body.age-readable-60 label{font-size:16px}
+body.age-readable-60 input,body.age-readable-60 select,body.age-readable-60 textarea{font-size:17px;min-height:48px}
+body.age-readable-60 button{font-size:16px}
+body.age-readable-60 h2{font-size:20px}
+body.age-readable-60 h3{font-size:16px}
+body.age-readable-60 .tip,body.age-readable-60 .note,body.age-readable-60 .income-pending{font-size:16px}
+body.age-readable-60 .amt,body.age-readable-60 .rm b,body.age-readable-60 .fr span,body.age-readable-60 .trio b{font-size:1.16em}
+body.age-readable-60 .big{font-size:clamp(52px,15vw,80px)}
+body.age-readable-60 .big2{font-size:40px}
+body.age-readable-60 nav button{font-size:13.5px;min-height:46px}
+body.age-readable-70{font-size:18px}
+body.age-readable-70 small{font-size:16px}
+body.age-readable-70 label{font-size:17px}
+body.age-readable-70 input,body.age-readable-70 select,body.age-readable-70 textarea{font-size:18px;min-height:50px}
+body.age-readable-70 button{font-size:17px}
+body.age-readable-70 h2{font-size:22px}
+body.age-readable-70 h3{font-size:17px}
+body.age-readable-70 .tip,body.age-readable-70 .note,body.age-readable-70 .income-pending{font-size:17px}
+body.age-readable-70 .amt,body.age-readable-70 .rm b,body.age-readable-70 .fr span,body.age-readable-70 .trio b{font-size:1.2em}
+body.age-readable-70 .big{font-size:clamp(54px,16vw,84px)}
+body.age-readable-70 .big2{font-size:42px}
+body.age-readable-70 nav button{font-size:14px;min-height:48px}
+
 </style></head><body class="locked">
 <header><div style="display:flex;gap:12px;align-items:center"><img class="mascota" alt="" width="46" height="46"><div><small id="hi"></small><h1>Mis finanzas</h1></div></div><button class="btn sec" id="prof" aria-label="Perfil y ajustes">Perfil</button></header>
 <main>
@@ -381,7 +420,7 @@ $('budgetList').onclick=$('budgetCards').onclick=budgetClick;$('newBudget2').onc
 
 function renderUpcoming(){const items=MisFinanzasRecurrence.upcomingOccurrences(S.rec,ymd(new Date()),30,ymd);$('upcomingList').innerHTML=items.length?items.map(x=>{const d=new Date(x.date+'T00:00:00'),dateLabel=d.toLocaleDateString('es-EC',{day:'2-digit',month:'short'});return '<div class="upcoming-item"><span class="upcoming-date">'+esc(dateLabel)+'</span><div class="upcoming-main"><b>'+esc(x.description)+'</b><small>'+esc(x.type==='income'?'Cobro previsto':'Pago previsto')+(x.category?' · '+esc(x.category):'')+'</small></div><span class="upcoming-amount '+esc(x.type)+'">'+(x.type==='income'?'+':'−')+m(x.amount)+'</span></div>'}).join(''):'<p class="empty">No tienes pagos ni cobros fijos previstos para los próximos 30 días. Si tienes alguno, puedes registrarlo como fijo desde el botón +.</p>'}
 function renderCoachIncome(){const el=$('coachIncome');if(!el)return;const c=coachData();if(c.pend>0&&c.nx){el.hidden=false;el.textContent='Próximo ingreso previsto: '+m(c.pend)+' · '+c.D(c.nx.date).toLocaleDateString('es-EC',{day:'numeric',month:'long'})+' (no incluido en tu disponible)'}else{el.hidden=true;el.textContent=''}}
-function render(){const P=S.profile,pl=S.tx.filter(x=>inP(x.date)),i=sum(pl,'income'),o=sum(pl,'expense');
+function render(){const P=S.profile,edad=Number(P.age)||0;document.body.classList.toggle('age-readable-50',edad>=50&&edad<60);document.body.classList.toggle('age-readable-60',edad>=60&&edad<70);document.body.classList.toggle('age-readable-70',edad>=70);const pl=S.tx.filter(x=>inP(x.date)),i=sum(pl,'income'),o=sum(pl,'expense');
 $('hi').textContent='Hola, '+dn(P);$('bal').textContent=m(bal());$('sIn').textContent=m(i);$('sOut').textContent=m(o);$('sSv').textContent=m(sum(S.tx,'save'));
 renderCoachIncome();tips(pl,i,o);charts(pl);list();fixed();goals();renderBudgets();renderUpcoming()}
 const sum1=a=>a.reduce((x,y)=>x+y,0);

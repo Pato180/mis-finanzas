@@ -89,6 +89,17 @@ if (scriptBlocks.length === 0) {
   }
 }
 
+const accessibilityRequirements = [
+  [/Accesibilidad: texto más legible según la edad/, 'index.html debe incluir estilos de accesibilidad por edad.'],
+  [/age-readable-50/, 'La app debe aumentar el texto desde los 50 años.'],
+  [/age-readable-60/, 'La app debe aumentar más el texto desde los 60 años.'],
+  [/age-readable-70/, 'La app debe aumentar más el texto desde los 70 años.'],
+  [/document\.body\.classList\.toggle\('age-readable-50',edad>=50&&edad<60\)/, 'El tamaño debe actualizarse según la edad del perfil activo.'],
+];
+for (const [pattern, message] of accessibilityRequirements) {
+  if (!pattern.test(html)) fail(message);
+}
+
 const coachRequirements = [
   [/function coachData\(\)/, 'index.html debe calcular los datos base del coach en una sola función.'],
   [/function tips\(pl,i,o\)/, 'index.html debe incluir el evaluador de reglas del coach.'],
