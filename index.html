@@ -732,8 +732,8 @@ document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');if(
 $('per').onchange=e=>{S.per=e.target.value;render()};$('q').oninput=$('mSel').oninput=$('aMin').oninput=$('aMax').oninput=list;
 $('flt').onclick=e=>{const f=e.target.dataset.f;if(!f)return;S.flt=f;document.querySelectorAll('#flt button').forEach(b=>b.classList.toggle('on',b.dataset.f===f));list()};
 $('lst').onclick=e=>{const r=e.target.closest('.row');if(!r)return;if(e.target.dataset.e!==undefined){const t=S.tx.find(x=>String(x.id)===String(r.dataset.id));return t&&t.type==='save'?openSave(null,null,t.id):openTx(r.dataset.id)}if(e.target.dataset.d!==undefined)return del(r.dataset.id);r.classList.toggle('open')};
-document.querySelector('#dTx .seg').onclick=e=>{if(e.target.dataset.t)setType(e.target.dataset.t)};
-$('motC').onclick=e=>{if(e.target.tagName==='BUTTON')$('txM').value=e.target.textContent};
+document.querySelector('#dTx .seg').onclick=e=>{if(e.target.dataset.t){autoCategoryApplied=false;setType(e.target.dataset.t)}};
+$('motC').onclick=e=>{if(e.target.tagName==='BUTTON'){$('txM').value=e.target.textContent;$('txM').dispatchEvent(new Event('input',{bubbles:true}))}};
 $('fTx').onsubmit=e=>{e.preventDefault();const before=budgetSnap(),d=$('txM').value.trim(),previous=eid?S.tx.find(t=>String(t.id)===String(eid)):null;if(eid&&!previous)return toast('No encontré este movimiento. Cierra el formulario y vuelve a abrirlo.');
 // Al editar, conservar el objeto completo y sobrescribir únicamente los campos del formulario.
 // Así se mantienen reason, rid (vínculo con recurrentes), fixed, goalId y futuros metadatos.
@@ -848,8 +848,28 @@ function autoCats(){['expense','income'].forEach(t=>{const g={},used=new Set([].
 S.tx.filter(x=>x.type===t&&x.category===OT[t]&&!x.fixed&&x.reason).forEach(x=>{const k=nz(x.reason);if(k)(g[k]=g[k]||[]).push(x)});
 Object.entries(g).forEach(([k,L])=>{let c=S.cats.find(y=>y.type===t&&nz(y.name)===k);if(!c){if(L.length<4||used.has(k)||S.cats.some(y=>nz(y.name)===k))return;const nm=L[0].reason.trim().replace(/^./,q=>q.toUpperCase());c={id:'c'+Date.now()+t,name:nm,type:t,auto:true};S.cats.push(c)}L.forEach(x=>{x.category=c.name;delete x.sub})})})}
 $('svK').innerHTML=SAVK.map(n=>'<option>'+n+'</option>').join('');
-$('txC').onchange=()=>subs();
-$('txM').addEventListener('input',()=>{const g=guess($('txM').value,tt),b=$('txSg');if(!g||($('txC').value===g[0]&&$('txS').value===g[1])){b.hidden=true;return}b.hidden=false;b.innerHTML='<button type="button" class="lnk" id="txSgB">Sugerencia: '+esc(g[0]+' › '+g[1])+' · Aplicar</button>';$('txSgB').onclick=()=>{$('txC').value=g[0];subs(g[1]);b.hidden=true}});
+let autoCategoryApplied=false;
+$('txC').onchange=()=>{subs();autoCategoryApplied=false;$('txSg').hidden=true};
+function autoCategoryFromMotif(){
+  const d=$('txM').value.trim(),b=$('txSg');
+  if(!d){if(autoCategoryApplied)setType(tt,OT[tt]);autoCategoryApplied=false;b.hidden=true;return}
+  const key=nz(d);
+  // La elección guardada por el usuario tiene prioridad sobre las reglas generales.
+  const remembered=S.tx.slice().reverse().find(x=>x.type===tt&&x.category&&nz(x.description)===key);
+  const g=remembered?{category:remembered.category,sub:remembered.sub||''}:(()=>{const v=guess(d,tt);return v?{category:v[0],sub:v[1]}:null})();
+  if(!g){
+    if(autoCategoryApplied)setType(tt,OT[tt]);
+    autoCategoryApplied=false;b.hidden=true;return;
+  }
+  if($('txC').value!==g.category||$('txS').value!==g.sub){
+    setType(tt,g.category,g.sub);
+  }
+  autoCategoryApplied=true;
+  b.hidden=false;
+  const source=remembered?'Motivo registrado antes':'Sugerencia automática';
+  b.innerHTML='<small>'+esc(source+': '+g.category+(g.sub?' › '+g.sub:''))+' · Puedes cambiarlo si hace falta.</small>';
+}
+$('txM').addEventListener('input',autoCategoryFromMotif);
 
 const WD=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 function fx(){const f=$('txK').value==='fijo'&&!eid;$('txFw').hidden=!f;$('txDh').hidden=!f;$('txDl').textContent=f?(tt==='income'?'Fecha en que ingresa':'Fecha en que se paga'):'Fecha';
