@@ -44,6 +44,24 @@ nav{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);width:min(440
 nav button{color:var(--mut);font-size:11.5px;display:flex;flex-direction:column;align-items:center;padding:4px 8px;min-width:58px}nav button.on{color:#fff}
 nav .fab{background:var(--card);color:var(--ink);width:54px;height:54px;border-radius:50%;font-size:30px;line-height:1;margin-top:-24px;justify-content:center;min-width:0;padding:0;box-shadow:0 4px 14px #0005}
 dialog{border:0;border-radius:20px;padding:22px;width:min(420px,calc(100% - 24px));margin:auto;box-shadow:0 20px 60px #0006}
+/* El registro guiado también respeta el tamaño de texto accesible del perfil. */
+body.age-readable-50 .tx-dialog label{font-size:17px}
+body.age-readable-50 .tx-dialog input,body.age-readable-50 .tx-dialog select{font-size:18px;min-height:50px}
+body.age-readable-50 .tx-dialog button{font-size:16px;min-height:44px}
+body.age-readable-50 .tx-progress span{font-size:16px}
+body.age-readable-60 .tx-dialog label{font-size:18px}
+body.age-readable-60 .tx-dialog input,body.age-readable-60 .tx-dialog select{font-size:19px;min-height:54px}
+body.age-readable-60 .tx-dialog button{font-size:17px;min-height:48px}
+body.age-readable-60 .tx-progress span{font-size:17px;width:32px;height:32px}
+body.age-readable-70 .tx-dialog label{font-size:19px}
+body.age-readable-70 .tx-dialog input,body.age-readable-70 .tx-dialog select{font-size:20px;min-height:56px}
+body.age-readable-70 .tx-dialog button{font-size:18px;min-height:50px}
+body.age-readable-70 .tx-progress span{font-size:18px;width:34px;height:34px}
+.tx-dialog input,.tx-dialog select{width:100%;box-sizing:border-box}
+.tx-dialog #txA{font-size:22px;font-weight:700}
+body.age-readable-50 .tx-dialog #txA{font-size:24px}
+body.age-readable-60 .tx-dialog #txA{font-size:26px}
+body.age-readable-70 .tx-dialog #txA{font-size:28px}
 .tx-dialog section[hidden]{display:none}.tx-progress{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 18px}.tx-progress span{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--soft);color:var(--ink);font-weight:700;font-size:13px}.tx-progress span.on{background:var(--mauve);color:#fff}.tx-progress i{height:2px;width:34px;background:var(--soft)}.tx-dialog .bt{flex-wrap:wrap}.tx-dialog .bt .btn{min-width:90px}
 dialog::backdrop{background:#0a1512aa}.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .bt{display:flex;gap:8px;margin-top:18px}.bt .btn{flex:1}
