@@ -441,7 +441,7 @@ try{
   return false;
 }},
 sum=(l,t)=>l.filter(x=>x.type===t).reduce((a,x)=>a+x.amount,0),mo=r=>r.frequency==='weekly'?r.amount*4.33:r.amount,
-bal=()=>S.profile.initialBalance+sum(S.tx,'income')-sum(S.tx,'expense')-sum(S.tx,'save'),
+bal=()=>S.profile.initialBalance+sum(S.tx,'income')-S.tx.filter(x=>x.type==='expense'&&!x.fundingGoalId).reduce((a,x)=>a+(Number(x.amount)||0),0)-sum(S.tx,'save'),
 inP=d=>S.per==='all'||(S.per==='month'?d.slice(0,7)===ymd(new Date()).slice(0,7):ymd(wk(new Date(d+'T00:00')))===ymd(wk(new Date()))),
 addMot=v=>{S.motifs=S.motifs.filter(x=>x!==v);S.motifs.push(v)},
 snapshotState=()=>JSON.stringify(S),
