@@ -671,18 +671,18 @@ const tv=sum1(c.vv.map(x=>x.amount)),cg={};c.vv.forEach(x=>{const k=x.category||
 const t5=Object.entries(cg).filter(([k,v])=>!pm.some(b=>b.category===k&&Number(b.amount)>0)&&v.n>=5&&tv>0&&v.t/tv>.4).sort((a,b)=>b[1].t-a[1].t)[0];
 if(t5)al.push(M('w','a5',{cat:e(t5[0]),pct:Math.round(t5[1].t/tv*100),monto:m(t5[1].t)},{l:'Crear presupuesto',f:()=>{openBudget();const s=$('budgetCategory');if(s&&[...s.options].some(x=>x.value===t5[0]))s.value=t5[0]}}));
 // ---- Oportunidades (prioridad 2) ----
-const op=[],liq=L<=0||(c.proy!=null&&c.proy>L),fl=x=>Math.round(x*100)/100;
+const op=[],liq=L<=0||(c.proy!=null&&c.proy>L),fl=x=>Math.round(x*100)/100,weeklyIncome=sum1(S.rec.filter(r=>r.type==='income'&&r.frequency==='weekly').map(r=>Number(r.amount)||0)),safeSurplus=Math.max(0,L-(c.proy||0)-c.colchon),saveWeekCap=Math.min(safeSurplus,weeklyIncome>0?weeklyIncome:0);
 if(!liq){
 // O3: meta que se puede completar hoy sin tocar el colchón
-const c3=act.filter(x=>x.q<=cap).sort((a,b)=>a.q-b.q)[0];
+const c3=act.filter(x=>x.q<=safeSurplus&&x.q>0).sort((a,b)=>a.q-b.q)[0];
 if(c3)op.push(M('g','o3',{falta:m(c3.q),meta:e(c3.g.title)},{l:'Completar meta',f:()=>openSave(c3.g.id,fl(c3.q))}));
 // O1: apartar para una meta = el menor entre lo que falta y lo libre menos el colchón (mínimo 1 dólar)
-const c1=act.filter(x=>x.q>cap).sort((a,b)=>b.pr-a.pr)[0],mt=Math.floor(Math.min(cap,c1?c1.q:0)*100)/100;
+const c1=act.filter(x=>x.q>safeSurplus).sort((a,b)=>b.pr-a.pr)[0],mt=Math.floor(Math.min(safeSurplus,c1?c1.q:0)*100)/100;
 if(!c3&&c1&&mt>=1)op.push(M('g','o1',{libre:m(L),monto:m(mt),meta:e(c1.g.title)},{l:'Apartar '+m(mt),f:()=>openSave(c1.g.id,mt)}));
 // O3 (no alcanza hoy): meta cerca (70 % o más); el ritmo diario solo se muestra si cabe en lo que te sobra después de tu gasto habitual
-const n3=act.filter(x=>x.q>cap).sort((a,b)=>a.q-b.q)[0];
-if(n3){const mg=c.gd!=null&&c.dias!=null?(L-c.proy)/c.dias:0,nd=mg>0?Math.ceil(n3.q/mg):0;
-if(mg>=.5&&nd<=90)op.push(M('g','o3p',{falta:m(n3.q),meta:e(n3.g.title),dd:m(mg),sem:m(mg*7),nd}));
+const n3=act.filter(x=>x.q>safeSurplus).sort((a,b)=>a.q-b.q)[0];
+if(n3){const mg=c.gd!=null&&c.dias!=null?safeSurplus/c.dias:0,nd=mg>0?Math.ceil(n3.q/mg):0,sem=Math.min(mg*7,saveWeekCap);
+if(mg>=.5&&nd<=90&&sem>=.5)op.push(M('g','o3p',{falta:m(n3.q),meta:e(n3.g.title),dd:m(mg),sem:m(sem),nd}));
 else op.push(M('g',c.pend>0&&c.pend+cap>=n3.q?'o3n':'o3m',{falta:m(n3.q),meta:e(n3.g.title)}))}}
 // O2: ingreso fijo por llegar (solo informativo, sin botón de apartar y sin contarlo como disponible)
 if(c.pend>0)op.push(M('g','o2',{dia:c.D(c.nx.date).toLocaleDateString('es-EC',{day:'numeric',month:'long'}),monto:m(c.pend)}));
