@@ -334,7 +334,7 @@ body[data-theme] nav .bubble i{
 </div>
 <div class="duo">
 <section class="sec"><h2>Próximos pagos y cobros</h2><div class="hl"></div><small>Fijos previstos para los próximos 30 días. Son estimaciones; no se registran ni descuentan del saldo hasta su fecha.</small><div id="upcomingList"></div></section>
-<section class="sec"><div class="hd"><h2>Presupuesto del mes</h2><button type="button" class="btn sec" id="newBudget">+ Crear</button></div><div class="hl"></div><small>Controla cuánto quieres gastar por categoría. Los avisos no bloquean tus gastos.</small><div id="budgetList"></div><p class="note warn">⚠️ El cálculo usa solo los gastos que has registrado en la app durante el mes actual. No descuenta automáticamente movimientos que todavía no hayas registrado.</p></section>
+<section class="sec"><div class="hd"><h2>Presupuesto del mes</h2><button type="button" class="btn sec" id="newBudget">+ Crear</button></div><div class="hl"></div><small>Controla cuánto quieres gastar por categoría y elige un período semanal o mensual. Los avisos no bloquean tus gastos.</small><div id="budgetList"></div><p class="note">Se cuentan únicamente los gastos registrados en el período de cada presupuesto. El saldo no gastado no se acumula ni se considera ahorro automáticamente.</p></section>
 </div>
 </section>
 <section class="tab" id="t-list">
@@ -347,7 +347,7 @@ body[data-theme] nav .bubble i{
 <div class="blk"><div class="hd"><h2>Metas de ahorro</h2><button class="btn sec" id="newG">+ Nueva meta</button></div><div id="gl"></div><small style="margin-top:12px">Ahorro general sin meta: <b id="gen"></b></small></div>
 </section>
 <section class="tab" id="t-budgets">
-<div class="blk"><div class="hd"><div><h2>Presupuestos</h2><small>Controla tus gastos por categoría y mantén tus finanzas en equilibrio.</small></div><button type="button" class="btn" id="newBudget2">+ Nuevo presupuesto</button></div>
+<div class="blk"><div class="hd"><div><h2>Presupuestos</h2><small>Controla tus gastos por categoría con límites semanales o mensuales.</small></div><button type="button" class="btn" id="newBudget2">+ Nuevo presupuesto</button></div>
 <small id="budgetMonth" style="margin-top:8px"></small><div class="bgrid" id="budgetCards"></div>
 <p class="note">Los presupuestos son informativos: te avisaremos cuando llegues al 80 % y cuando superes el límite, pero nunca bloqueamos tus gastos.</p>
 <p class="note warn">⚠️ El cálculo usa solo los gastos que has registrado en la app durante el mes actual. No descuenta automáticamente movimientos que todavía no hayas registrado.</p></div>
@@ -357,7 +357,7 @@ body[data-theme] nav .bubble i{
 <nav aria-label="Navegación principal"><div class="navin"><span class="bubble" aria-hidden="true"><i></i></span><button data-go="home" class="on" aria-label="Resumen" title="Resumen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.6 12 3.2l9 7.4V20a1 1 0 0 1-1 1h-5v-6.2H9V21H4a1 1 0 0 1-1-1z"/></svg></button><button data-go="list" aria-label="Movimientos" title="Movimientos"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></button><button class="fab" id="add" aria-label="Nuevo movimiento" title="Nuevo movimiento"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5v15M4.5 12h15"/></svg></button><button data-go="goals" aria-label="Metas" title="Metas"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg></button><button data-go="budgets" aria-label="Presupuestos" title="Presupuestos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9h-9z"/><path d="M15.2 3.6A9 9 0 0 1 20.4 8.8h-5.2z"/></svg></button></div></nav>
 <div id="toast" role="status"></div>
 
-<dialog id="dBudget"><form id="fBudget" onsubmit="return false"><h2 id="budgetTitle">Nuevo presupuesto mensual</h2><small>El presupuesto se mantiene cada mes. Te avisaremos al llegar al 80 % y al superarlo, pero nunca se bloquea un gasto.</small><small>El cálculo usa solo los gastos que has registrado en la app durante el mes actual. No descuenta automáticamente movimientos que todavía no hayas registrado.</small><label for="budgetCategory">Categoría de gasto</label><select id="budgetCategory" required></select><label for="budgetAmount">Límite mensual ($)</label><input id="budgetAmount" type="number" min="0.01" step="0.01" required placeholder="Ej. 150.00"><div class="bt"><button type="button" class="btn sec" data-x>Cancelar</button><button type="submit" class="btn">Guardar presupuesto</button></div></form></dialog>
+<dialog id="dBudget"><form id="fBudget" onsubmit="return false"><h2 id="budgetTitle">Nuevo presupuesto mensual</h2><small>El presupuesto se renueva según la periodicidad elegida. Te avisaremos al llegar al 80 % y al superarlo, pero nunca se bloquea un gasto.</small><small>Solo se cuentan gastos registrados dentro del período elegido. El saldo no gastado no se acumula ni se considera ahorro automáticamente.</small><label for="budgetCategory">Categoría de gasto</label><select id="budgetCategory" required></select><label for="budgetFrequency">Periodicidad del presupuesto</label><select id="budgetFrequency"><option value="weekly">Semanal (lunes a domingo)</option><option value="monthly">Mensual (mes calendario)</option></select><label for="budgetAmount">Límite ($)</label><input id="budgetAmount" type="number" min="0.01" step="0.01" required placeholder="Ej. 150.00"><div class="bt"><button type="button" class="btn sec" data-x>Cancelar</button><button type="submit" class="btn">Guardar presupuesto</button></div></form></dialog>
 <dialog id="dAP"><form onsubmit="return false"><h2>Activos y pasivos</h2><small>Registra lo que tienes (activos) y lo que debes (pasivos). Se usan en el balance de tus reportes.</small><div id="apL"></div><div class="seg"><button type="button" data-k="a" class="on">Activo</button><button type="button" data-k="l">Pasivo</button></div><label for="apK">Tipo</label><select id="apK"></select><label for="apN">Nombre</label><input id="apN" placeholder="Ej. Cuenta de ahorros, Préstamo"><label for="apM">Monto ($)</label><input id="apM" type="number" step="0.01" min="0"><div class="bt"><button type="button" class="btn sec" data-x>Cerrar</button><button type="button" class="btn" id="apAdd">Agregar</button></div></form></dialog>
 <dialog id="dEx"><form onsubmit="return false"><h2 id="exT">Descargar</h2><small>¿Qué período quieres descargar?</small><div class="seg"><button type="button" data-p="mes" class="on">Un mes</button><button type="button" data-p="anio">Todo el año</button></div>
 <div id="exM"><label for="exMs">Mes y año</label><input id="exMs" type="month"><label for="exF">Estilo</label><select id="exF"><option value="banco">Estado de cuenta (como el banco)</option><option value="libro">Libro contable por meses</option></select></div>
@@ -469,9 +469,9 @@ LD={motivador:{g:'¡Vas por muy buen camino! ',w:'Esto se arregla con un pequeñ
 sty=(c,k,t)=>{if(c==='directo')t=t.replace(/\s*[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F]+/gu,'');return((LD[c]||{})[k]||'')+t};
 function toast(t,a,f){const e=$('toast');e.innerHTML=esc(t)+(a?' <button>'+a+'</button>':'');e.classList.add('on');if(a)e.querySelector('button').onclick=()=>{f();e.classList.remove('on')};clearTimeout(tm);tm=setTimeout(()=>e.classList.remove('on'),4500)}
 
-// ===== Presupuestos mensuales por categoría. Los avisos son informativos: nunca bloquean movimientos.
+// ===== Presupuestos por categoría y periodicidad. Los avisos son informativos: nunca bloquean movimientos.
 let budgetEditId=null;
-const cleanBudgets=v=>Array.isArray(v)?v.filter(b=>b&&typeof b.category==='string'&&b.category.trim()&&Number.isFinite(Number(b.amount))&&Number(b.amount)>0).map((b,i)=>({id:String(b.id||('b'+i)),category:b.category.trim(),amount:Number(b.amount)})):[];
+const cleanBudgets=v=>Array.isArray(v)?v.filter(b=>b&&typeof b.category==='string'&&b.category.trim()&&Number.isFinite(Number(b.amount))&&Number(b.amount)>0).map((b,i)=>({id:String(b.id||('b'+i)),category:b.category.trim(),amount:Number(b.amount),frequency:b.frequency==='weekly'?'weekly':'monthly'})):[];
 function budgetCategoryNames(){
  const custom=S.cats.filter(c=>c&&c.type==='expense'&&c.name).map(c=>c.name);
  return [...new Set([...Object.keys(CATG.expense),...custom])].sort((a,b)=>a.localeCompare(b,'es'));
@@ -482,39 +482,40 @@ function openBudget(id){
  if(budgetEditId&&!current)return toast('No encontré ese presupuesto. Actualiza la pantalla e inténtalo de nuevo.');
  const names=budgetCategoryNames();
  $('budgetCategory').innerHTML=names.map(n=>'<option value="'+esc(n)+'">'+esc(n)+'</option>').join('');
- $('budgetTitle').textContent=current?'Editar presupuesto':'Nuevo presupuesto mensual';
+ $('budgetTitle').textContent=current?'Editar presupuesto':'Nuevo presupuesto';
  $('budgetCategory').value=current?current.category:(names.find(n=>!S.budgets.some(b=>b.category===n))||names[0]||'');
  $('budgetAmount').value=current?current.amount:'';
+ $('budgetFrequency').value=current?(current.frequency==='weekly'?'weekly':'monthly'):'monthly';
  if(!$('dBudget').open)$('dBudget').showModal();
 }
 const bState=(spent,limit)=>{const a=Math.round(spent*100),l=Math.round(limit*100);return a>l?'over':(a===l&&l>0)?'full':(l>0&&a*10>=l*8)?'warn':'ok'},
 BL={ok:'En rango',warn:'Cerca del límite',full:'Límite alcanzado',over:'Límite superado'},BC={ok:'ok',warn:'warn',full:'over',over:'over'},BR={ok:0,warn:1,full:2,over:3};
-function budgetData(){const month=ymd(new Date()).slice(0,7);return cleanBudgets(S.budgets).map(b=>{const limit=Number(b.amount)||0,spent=Math.round(S.tx.filter(x=>x&&x.type==='expense'&&x.category===b.category&&typeof x.date==='string'&&x.date.slice(0,7)===month).reduce((t,x)=>t+(Number(x.amount)||0),0)*100)/100;
-return{...b,limit,spent,left:Math.max(0,Math.round((limit-spent)*100)/100),pct:limit>0?Math.floor(Math.round(spent*100)*100/Math.round(limit*100)):0,st:bState(spent,limit)}}).sort((a,b)=>a.category.localeCompare(b.category,'es'))}
+function budgetData(){const now=new Date(),today=ymd(now),month=today.slice(0,7),weekStart=ymd(wk(now)),weekEnd=(()=>{const d=new Date(weekStart+'T00:00:00');d.setDate(d.getDate()+6);return ymd(d)})();return cleanBudgets(S.budgets).map(b=>{const frequency=b.frequency==='weekly'?'weekly':'monthly',limit=Number(b.amount)||0,start=frequency==='weekly'?weekStart:month+'-01',end=frequency==='weekly'?weekEnd:ymd(new Date(now.getFullYear(),now.getMonth()+1,0)),spent=Math.round(S.tx.filter(x=>x&&x.type==='expense'&&x.category===b.category&&typeof x.date==='string'&&x.date>=start&&x.date<=end).reduce((t,x)=>t+(Number(x.amount)||0),0)*100)/100;
+return{...b,frequency,periodStart:start,periodEnd:end,limit,spent,left:Math.max(0,Math.round((limit-spent)*100)/100),pct:limit>0?Math.floor(Math.round(spent*100)*100/Math.round(limit*100)):0,st:bState(spent,limit)}}).sort((a,b)=>a.category.localeCompare(b.category,'es'))}
 const budgetSnap=()=>{const o={};budgetData().forEach(b=>{o[b.category]={spent:b.spent,st:b.st}});return o};
 // Aviso al cruzar el 80 % o el límite (solo informa; nunca bloquea el gasto).
 function budgetAlert(before){let best=null;budgetData().forEach(b=>{const p=before&&before[b.category];if(!p||b.spent<=p.spent||BR[b.st]<=BR[p.st])return;if(!best||BR[b.st]>BR[best.st])best=b});
 if(!best)return'';const c=best.category;return best.st==='over'?'🚨 Superaste tu presupuesto de '+c+' por '+m(best.spent-best.limit)+'. Puedes seguir registrando gastos.':best.st==='full'?'🚨 Alcanzaste el límite de tu presupuesto de '+c+'.':'⚠️ Llegaste al 80 % de tu presupuesto de '+c+'. Te quedan '+m(best.left)+'.'}
-const bCard=b=>'<div class="bcard"><div class="gh"><b>'+esc(b.category)+'</b><span class="num">'+m(b.limit)+'</span></div><small>Gastado: '+m(b.spent)+'</small><small>Restante: '+m(b.left)+'</small><div class="bar '+BC[b.st]+'" role="progressbar" aria-label="Uso del presupuesto de '+esc(b.category)+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.min(100,b.pct)+'"><i style="width:'+Math.min(100,b.pct)+'%"></i></div><div class="gh"><span class="bpill '+BC[b.st]+'">'+BL[b.st]+'</span><b>'+b.pct+'%</b></div>'+(b.st==='over'?'<small class="out">Superado por '+m(b.spent-b.limit)+'. Puedes seguir registrando gastos.</small>':'')+'<div class="bt2"><button type="button" class="btn sec" data-budget-edit="'+esc(b.id)+'">Editar</button><button type="button" class="lnk" data-budget-delete="'+esc(b.id)+'" style="color:var(--out)">Eliminar</button></div></div>';
+const bCard=b=>'<div class="bcard"><div class="gh"><b>'+esc(b.category)+'</b><span class="num">'+m(b.limit)+'</span></div><small>Presupuesto '+(b.frequency==='weekly'?'semanal':'mensual')+'</small><small>Gastado en este período: '+m(b.spent)+'</small><small>Restante: '+m(b.left)+'</small><div class="bar '+BC[b.st]+'" role="progressbar" aria-label="Uso del presupuesto de '+esc(b.category)+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.min(100,b.pct)+'"><i style="width:'+Math.min(100,b.pct)+'%"></i></div><div class="gh"><span class="bpill '+BC[b.st]+'">'+BL[b.st]+'</span><b>'+b.pct+'%</b></div>'+(b.st==='over'?'<small class="out">Superado por '+m(b.spent-b.limit)+'. Puedes seguir registrando gastos.</small>':'')+'<div class="bt2"><button type="button" class="btn sec" data-budget-edit="'+esc(b.id)+'">Editar</button><button type="button" class="lnk" data-budget-delete="'+esc(b.id)+'" style="color:var(--out)">Eliminar</button></div></div>';
 const pillHtml=b=>{const pc=Math.min(100,b.pct),h=Math.max(pc,10);return '<div class="pill '+BC[b.st]+'"><div class="ptrack" role="progressbar" aria-label="Uso del presupuesto de '+esc(b.category)+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pc+'"><div class="pfill" style="height:'+h+'%">'+(pc>=30?'<b>'+m(b.spent)+'</b><small>gastado</small>':'')+'</div><span class="pbadge" style="top:'+(100-h)+'%">'+b.pct+'%</span></div><span class="pname" title="'+esc(b.category)+'">'+esc(b.category)+'</span><small class="plim">'+m(b.spent)+' de '+m(b.limit)+'</small></div>'};
 function renderBudgets(){const D=budgetData(),empty='<p class="empty">Todavía no has definido límites de gasto. Crea uno para alimentación, transporte, entretenimiento u otra categoría.</p>';
-$('budgetMonth').textContent='Mes actual: '+new Date().toLocaleDateString('es-EC',{month:'long',year:'numeric'});
+$('budgetMonth').textContent='Los presupuestos semanales se calculan de lunes a domingo; los mensuales, por mes calendario. El saldo no gastado no se acumula automáticamente.';
 $('budgetList').innerHTML=D.length?'<div class="pillbox"><div class="pills">'+D.map(pillHtml).join('')+'</div></div><button type="button" class="lnk" data-gob style="margin-top:10px">Ver todos los presupuestos →</button>':empty;
 $('budgetCards').innerHTML=D.length?D.map(bCard).join(''):empty;
-$('budgetTable').innerHTML=D.length?'<table class="bt3"><thead><tr><th>Categoría</th><th class="r">Límite mensual</th><th class="r">Gastado</th><th class="r">Restante</th><th>Estado</th></tr></thead><tbody>'+D.map(b=>'<tr><td>'+esc(b.category)+'</td><td class="r">'+m(b.limit)+'</td><td class="r">'+m(b.spent)+'</td><td class="r">'+m(b.left)+'</td><td><span class="bpill '+BC[b.st]+'">'+BL[b.st]+'</span></td></tr>').join('')+'</tbody></table>':''}
+$('budgetTable').innerHTML=D.length?'<table class="bt3"><thead><tr><th>Categoría</th><th>Periodicidad</th><th class="r">Límite</th><th class="r">Gastado</th><th class="r">Restante</th><th>Estado</th></tr></thead><tbody>'+D.map(b=>'<tr><td>'+esc(b.category)+'</td><td>'+(b.frequency==='weekly'?'Semanal':'Mensual')+'</td><td class="r">'+m(b.limit)+'</td><td class="r">'+m(b.spent)+'</td><td class="r">'+m(b.left)+'</td><td><span class="bpill '+BC[b.st]+'">'+BL[b.st]+'</span></td></tr>').join('')+'</tbody></table>':''}
 $('newBudget').onclick=()=>openBudget();
 $('fBudget').onsubmit=e=>{
  e.preventDefault();
- const category=$('budgetCategory').value,amount=Number($('budgetAmount').value);
- if(!category||!Number.isFinite(amount)||amount<=0)return alert('Elige una categoría y un límite mensual mayor que cero.');
+ const category=$('budgetCategory').value,amount=Number($('budgetAmount').value),frequency=$('budgetFrequency').value==='weekly'?'weekly':'monthly';
+ if(!category||!Number.isFinite(amount)||amount<=0)return alert('Elige una categoría y un límite semanal o mensual mayor que cero.');
  const duplicate=S.budgets.find(b=>b.category===category&&String(b.id)!==String(budgetEditId));
  if(duplicate)return alert('Ya existe un presupuesto para esta categoría. Puedes editar el que ya tienes.');
  const previous=S.budgets.map(b=>({...b}));
  if(budgetEditId){
   const idx=S.budgets.findIndex(b=>String(b.id)===String(budgetEditId));
   if(idx<0)return alert('No encontré ese presupuesto. Vuelve a abrirlo e inténtalo de nuevo.');
-  S.budgets[idx]={...S.budgets[idx],category,amount};
- }else S.budgets.push({id:'b'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),category,amount});
+  S.budgets[idx]={...S.budgets[idx],category,amount,frequency};
+ }else S.budgets.push({id:'b'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),category,amount,frequency});
  if(!save()){S.budgets=previous;return}
  $('dBudget').close();renderBudgets();toast(budgetEditId?'Presupuesto actualizado':'Presupuesto creado');
 };
@@ -651,8 +652,8 @@ function tips(pl,i,o){const P=S.profile,st=CM[P.coach]||CM.cercano,nm=esc(dn(P))
 c=coachData(),A=[],out=[],e=esc,
 // Un mensaje = clase de color + texto del estilo elegido + botón opcional (label + acción).
 M=(k,id,v,b)=>({k,id,t:st[id](Object.assign({n:nm,Vo,libre:m(c.libre)},v)),b}),
-// P0: pocos datos (menos de 5 movimientos o menos de 3 días de uso) → solo el mensaje de bienvenida.
-poco=c.periodMoves<5||c.usoDias<3;
+// P0 solo cuando hay menos de cinco movimientos registrados en total; no penalizar un período mensual aún en curso.
+poco=S.tx.filter(x=>x&&x.date&&x.date<=c.td).length<5;
 if(poco)out.push(M('','p0',{}));
 else{
 const BD=budgetData(),pm=S.budgets,L=c.libre,cap=Math.max(0,L-c.colchon),
