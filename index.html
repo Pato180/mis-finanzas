@@ -658,7 +658,8 @@ proy=gd!=null&&dias!=null?gd*Math.max(0,dias):null,
 gastableBase=gd!=null&&dias!=null?Math.max(0,libre-proy-colchon):0,
 budgetReserve=(()=>{const bs=budgetData(),end=nx?nx.date:add(td,freq==='semanal'?7:30),leftDays=Math.max(0,dd(td,end)),monthDays=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),monthLeft=Math.max(1,dd(td,ymd(new Date(now.getFullYear(),now.getMonth()+1,0)))+1),weekLeft=Math.max(1,7-(now.getDay()+6)%7);return bs.reduce((sum,b)=>{const remaining=Math.max(0,b.limit-b.spent);if(b.frequency==='weekly')return sum+Math.min(remaining, b.limit*Math.min(leftDays,weekLeft)/7);return sum+Math.min(remaining,b.limit*Math.min(leftDays,monthLeft)/monthDays)},0)})(),
 // No recomendar apartar dinero que el presupuesto y el gasto habitual podrían necesitar antes del próximo ingreso.
-gastable=Math.max(0,Math.min(gastableBase,libre-budgetReserve-colchon)),
+// El presupuesto y la proyección cubren en parte los mismos gastos: se reserva el mayor de ambos, no se restan dos veces. El colchón se descuenta una sola vez.
+gastable=gd!=null&&dias!=null?Math.max(0,libre-Math.max(proy||0,budgetReserve)-colchon):0,
 prevStart=incD[1]&&incD[1]<start?incD[1]:add(start,freq==='semanal'?-7:-30),
 prevV=S.tx.filter(x=>x.type==='expense'&&!x.fixed&&x.date>=prevStart&&x.date<start),
 prevDaily=sum1(prevV.map(x=>Number(x.amount)||0))/Math.max(1,dd(prevStart,start)),
