@@ -554,6 +554,7 @@ a3:v=>`Te pasaste <b>${v.exc}</b> de tu presupuesto de <b>${v.cat}</b> (${v.gas}
 a3f:v=>`Llegaste al límite de tu presupuesto de <b>${v.cat}</b> (${v.gas} de ${v.lim}). Cuidemos los próximos gastos de esa categoría.`,
 a4:v=>`Vas en <b>${v.gas}</b> de tus ${v.lim} en <b>${v.cat}</b>. Te quedan <b>${v.rest}</b> ${v.para}.`,
 a5:v=>`<b>${v.cat}</b> concentra el ${v.pct}% de tus gastos variables (${v.monto}). ¿Quieres ponerle un presupuesto?`,
+a6:v=>`Ojo con <b>${v.cat}</b>: ya gastaste <b>${v.gas}</b> de tu presupuesto de <b>${v.lim}</b>, y el período va por el ${v.elapsed}%. Como ya hiciste varias compras aquí, revisa cuáles son necesarias y pausa las opcionales para que el presupuesto te alcance. 💛`,
 o1:v=>`Tras reservar pagos, gasto previsto y colchón, podrías apartar <b>${v.monto}</b> para “${v.meta}”. Es una estimación, no un ahorro registrado. 🚀`,
 o2:v=>`El ${v.dia} te llegan <b>${v.monto}</b>. Cuando se registre, veremos cuánto apartar. 😉`,
 o3:v=>`¡Solo te faltan <b>${v.falta}</b> para “${v.meta}”! Ya tienes con qué completarla. 👑`,
@@ -573,6 +574,7 @@ a3:v=>`<b>${v.cat}</b>: superaste tu presupuesto por <b>${v.exc}</b> (${v.gas} d
 a3f:v=>`<b>${v.cat}</b>: llegaste al límite de tu presupuesto (${v.gas} de ${v.lim}). Evita más gastos aquí.`,
 a4:v=>`<b>${v.cat}</b>: ${v.gas} de ${v.lim}. Quedan <b>${v.rest}</b> ${v.para}.`,
 a5:v=>`<b>${v.cat}</b> es el ${v.pct}% de tus gastos variables (${v.monto}). ¿Le pones presupuesto?`,
+a6:v=>`<b>${v.cat}</b>: llevas <b>${v.gas}</b> de <b>${v.lim}</b>, pero solo ha transcurrido el ${v.elapsed}% del período. Revisa compras repetidas u opcionales antes de gastar más.`,
 o1:v=>`Tras reservar pagos, gasto previsto y colchón, podrías apartar <b>${v.monto}</b> para “${v.meta}”. Es una estimación, no ahorro registrado.`,
 o2:v=>`El ${v.dia} llegan <b>${v.monto}</b>. Se usarán en los cálculos cuando estén registrados.`,
 o3:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Tienes saldo para completarla.`,
@@ -592,6 +594,7 @@ a3:v=>`Te pasaste <b>${v.exc}</b> en <b>${v.cat}</b> (${v.gas} de ${v.lim}), per
 a3f:v=>`Llegaste justo al límite en <b>${v.cat}</b> (${v.gas} de ${v.lim}). Cuida los próximos gastos y sigues con el control. 💪`,
 a4:v=>`¡Ojo, vas cerca del límite en <b>${v.cat}</b>! Llevas ${v.gas} de ${v.lim}; con los <b>${v.rest}</b> que quedan puedes cerrar bien el período. 🎯`,
 a5:v=>`<b>${v.cat}</b> se lleva el ${v.pct}% de tus gastos variables (${v.monto}). ¡Ponle un presupuesto y retoma el control! 🚀`,
+a6:v=>`¡Revisemos <b>${v.cat}</b>! Ya llevas <b>${v.gas}</b> de <b>${v.lim}</b> y el período va por el ${v.elapsed}%. Si algunas compras pueden esperar, pausarlas te ayudará a cuidar tu presupuesto. 🎯`,
 o1:v=>`Tras reservar pagos, gasto previsto y colchón, podrías destinar <b>${v.monto}</b> a “${v.meta}”. No se contará como ahorro hasta que lo registres.`,
 o2:v=>`¡El ${v.dia} llegan <b>${v.monto}</b>! Cuando se registren, planeamos cuánto apartar para tus metas. 🌟`,
 o3:v=>`¡Estás a <b>${v.falta}</b> de lograr “${v.meta}”! Tienes lo necesario para cerrarla hoy. 🏆`,
@@ -611,6 +614,7 @@ a3:v=>`Superaste tu presupuesto de <b>${v.cat}</b> por <b>${v.exc}</b> (${v.gas}
 a3f:v=>`Llegaste al límite de tu presupuesto de <b>${v.cat}</b> (${v.gas} de ${v.lim}). Puedes ir con calma con los próximos gastos de esa categoría.`,
 a4:v=>`En <b>${v.cat}</b> llevas ${v.gas} de ${v.lim}. Quedan <b>${v.rest}</b> ${v.para}.`,
 a5:v=>`<b>${v.cat}</b> representa el ${v.pct}% de tus gastos variables (${v.monto}). Si quieres, puedes ponerle un presupuesto.`,
+a6:v=>`En <b>${v.cat}</b> llevas <b>${v.gas}</b> de <b>${v.lim}</b>, aunque solo ha transcurrido el ${v.elapsed}% del período. Podría ayudarte revisar cuáles compras son necesarias y cuáles pueden esperar.`,
 o1:v=>`Si los registros recientes son representativos, podrías destinar <b>${v.monto}</b> a “${v.meta}” tras reservar pagos, gastos previstos y colchón. No es ahorro registrado.`,
 o2:v=>`El ${v.dia} está previsto un ingreso de <b>${v.monto}</b>. Cuando se registre, podremos ver cuánto apartar.`,
 o3:v=>`Para “${v.meta}” faltan <b>${v.falta}</b>, y hoy cuentas con lo necesario para completarla.`,
@@ -672,6 +676,12 @@ const ov=BD.filter(b=>b.limit>0&&b.spent>=b.limit).sort((a,b)=>(b.spent-b.limit)
 if(ov){const x=ov.spent>ov.limit;al.push(M('w',x?'a3':'a3f',{cat:e(ov.category),exc:m(ov.spent-ov.limit),gas:m(ov.spent),lim:m(ov.limit)},{l:'Ver presupuestos',f:()=>go('budgets')}))}
 const wn=BD.filter(b=>b.st==='warn').sort((a,b)=>b.pct-a.pct)[0];
 if(wn)al.push(M('w','a4',{cat:e(wn.category),gas:m(wn.spent),lim:m(wn.limit),rest:m(wn.left),para:dayL>1?'para los próximos '+dayL+' días':'para hoy'},{l:'Ver presupuestos',f:()=>go('budgets')}));
+ // A6: alerta preventiva basada en datos reales. No etiqueta gastos como innecesarios; señala un ritmo de gasto superior al avance del período.
+ const todayDate=new Date(c.td+'T00:00:00');
+ const pace=BD.map(b=>{const total=Math.max(1,Math.round((new Date(b.periodEnd+'T00:00:00')-new Date(b.periodStart+'T00:00:00'))/86400000)+1),elapsed=Math.min(100,Math.round((Math.round((todayDate-new Date(b.periodStart+'T00:00:00'))/86400000)+1)/total*100)),count=S.tx.filter(x=>x&&x.type==='expense'&&x.category===b.category&&x.date>=b.periodStart&&x.date<=c.td).length;return{...b,elapsed,count}}).filter(b=>b.limit>0&&b.spent<b.limit&&b.count>=3&&b.pct>=35&&b.pct>=b.elapsed+20).sort((a,b)=>(b.pct-b.elapsed)-(a.pct-a.elapsed));
+ const fast=pace[0];
+ if(fast)al.push(M('w','a6',{cat:e(fast.category),gas:m(fast.spent),lim:m(fast.limit),elapsed:fast.elapsed},{l:'Revisar presupuesto',f:()=>go('budgets')}));
+
 // A5: categoría con 5 o más movimientos y más del 40 % del gasto variable, sin presupuesto. No propone ningún tope: el monto lo elige la persona.
 const tv=sum1(c.vv.map(x=>x.amount)),cg={};c.vv.forEach(x=>{const k=x.category||'Otros gastos';(cg[k]=cg[k]||{t:0,n:0});cg[k].t+=x.amount;cg[k].n++});
 const t5=Object.entries(cg).filter(([k,v])=>!pm.some(b=>b.category===k&&Number(b.amount)>0)&&v.n>=5&&tv>0&&v.t/tv>.4).sort((a,b)=>b[1].t-a[1].t)[0];
