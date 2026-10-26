@@ -548,13 +548,13 @@ const sum1=a=>a.reduce((x,y)=>x+y,0);
 const CM={
 cercano:{
 p0:v=>`¡Hola, ${v.n}! Ya empezamos. Sigue registrando tus movimientos unos días y te doy consejos con tus números reales. 💖`,
-a1:v=>`${v.Vo}, ahorita no te queda dinero libre (<b>${v.libre}</b>). Prioricemos lo esencial hasta tu próximo ingreso. ☕`,
+a1:v=>`${v.Vo}, después de reservar los pagos fijos previstos no queda dinero libre (<b>${v.libre}</b>). Prioricemos lo esencial hasta tu próximo ingreso. ☕`,
 a2:v=>`Con tu ritmo de gasto (<b>${v.gd}</b> al día), te faltarían <b>${v.falta}</b> antes de tu próximo ingreso. Intentemos quedarnos en <b>${v.diario}</b> diarios. 💪`,
 a3:v=>`Te pasaste <b>${v.exc}</b> de tu presupuesto de <b>${v.cat}</b> (${v.gas} de ${v.lim}). No pasa nada: frenemos aquí y compensemos con otras categorías.`,
 a3f:v=>`Llegaste al límite de tu presupuesto de <b>${v.cat}</b> (${v.gas} de ${v.lim}). Cuidemos los próximos gastos de esa categoría.`,
 a4:v=>`Vas en <b>${v.gas}</b> de tus ${v.lim} en <b>${v.cat}</b>. Te quedan <b>${v.rest}</b> ${v.para}.`,
 a5:v=>`<b>${v.cat}</b> concentra el ${v.pct}% de tus gastos variables (${v.monto}). ¿Quieres ponerle un presupuesto?`,
-o1:v=>`Tienes <b>${v.libre}</b> libres hoy. Podrías apartar <b>${v.monto}</b> para “${v.meta}” y aún te queda tu colchón. 🚀`,
+o1:v=>`Tras reservar pagos, gasto previsto y colchón, podrías apartar <b>${v.monto}</b> para “${v.meta}”. Es una estimación, no un ahorro registrado. 🚀`,
 o2:v=>`El ${v.dia} te llegan <b>${v.monto}</b>. Cuando se registre, veremos cuánto apartar. 😉`,
 o3:v=>`¡Solo te faltan <b>${v.falta}</b> para “${v.meta}”! Ya tienes con qué completarla. 👑`,
 o3p:v=>`Te faltan <b>${v.falta}</b> para “${v.meta}”. Guardando <b>${v.dd}</b> diarios (o <b>${v.sem}</b> por semana) llegas en ${v.nd} días. 😊`,
@@ -567,13 +567,13 @@ ok:v=>`Todo en orden por ahora, ${v.n}: tienes <b>${v.libre}</b> libres. 💖`,
 repeat:v=>`Seguimos paso a paso, ${v.n}. Tu disponible es <b>${v.libre}</b>; revisa tus movimientos y la recomendación antes de decidir. 💖`},
 directo:{
 p0:v=>`Aún hay pocos datos. Registra tus movimientos unos días y te doy consejos con tus números.`,
-a1:v=>`Dinero libre: <b>${v.libre}</b>. Prioriza lo esencial hasta tu próximo ingreso.`,
+a1:v=>`Tras reservar pagos fijos previstos, queda: <b>${v.libre}</b>. Prioriza lo esencial hasta tu próximo ingreso.`,
 a2:v=>`Te faltarían <b>${v.falta}</b> antes de tu próximo ingreso. Gasta como máximo <b>${v.diario}</b> al día.`,
 a3:v=>`<b>${v.cat}</b>: superaste tu presupuesto por <b>${v.exc}</b> (${v.gas} de ${v.lim}). Evita más gastos aquí.`,
 a3f:v=>`<b>${v.cat}</b>: llegaste al límite de tu presupuesto (${v.gas} de ${v.lim}). Evita más gastos aquí.`,
 a4:v=>`<b>${v.cat}</b>: ${v.gas} de ${v.lim}. Quedan <b>${v.rest}</b> ${v.para}.`,
 a5:v=>`<b>${v.cat}</b> es el ${v.pct}% de tus gastos variables (${v.monto}). ¿Le pones presupuesto?`,
-o1:v=>`Libre: <b>${v.libre}</b>. Aparta <b>${v.monto}</b> para “${v.meta}”.`,
+o1:v=>`Tras reservar pagos, gasto previsto y colchón, podrías apartar <b>${v.monto}</b> para “${v.meta}”. Es una estimación, no ahorro registrado.`,
 o2:v=>`El ${v.dia} llegan <b>${v.monto}</b>. Se usarán en los cálculos cuando estén registrados.`,
 o3:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Tienes saldo para completarla.`,
 o3p:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Ahorra <b>${v.dd}</b> al día o <b>${v.sem}</b> por semana: ${v.nd} días.`,
@@ -586,13 +586,13 @@ ok:v=>`Todo en orden. Libre: <b>${v.libre}</b>.`,
 repeat:v=>`La recomendación anterior sigue en revisión. Disponible actual: <b>${v.libre}</b>. Comprueba tus movimientos antes de decidir.`},
 motivador:{
 p0:v=>`¡Hola, ${v.n}, arrancamos! Registra tus movimientos unos días y verás consejos hechos con tus números reales. 🌟`,
-a1:v=>`Toca ajustar: hoy no tienes dinero libre (<b>${v.libre}</b>). Si te enfocas en lo esencial, llegas a tu próximo ingreso. 💪`,
+a1:v=>`Tras reservar los pagos fijos previstos, no queda dinero libre (<b>${v.libre}</b>). Si te enfocas en lo esencial, llegas a tu próximo ingreso. 💪`,
 a2:v=>`¡Todavía se puede! Si bajas a <b>${v.diario}</b> diarios, llegas a tu próximo ingreso sin problema. 🔥`,
 a3:v=>`Te pasaste <b>${v.exc}</b> en <b>${v.cat}</b> (${v.gas} de ${v.lim}), pero aún puedes equilibrar el período. ¡Frenemos aquí y compensemos! 💪`,
 a3f:v=>`Llegaste justo al límite en <b>${v.cat}</b> (${v.gas} de ${v.lim}). Cuida los próximos gastos y sigues con el control. 💪`,
 a4:v=>`¡Ojo, vas cerca del límite en <b>${v.cat}</b>! Llevas ${v.gas} de ${v.lim}; con los <b>${v.rest}</b> que quedan puedes cerrar bien el período. 🎯`,
 a5:v=>`<b>${v.cat}</b> se lleva el ${v.pct}% de tus gastos variables (${v.monto}). ¡Ponle un presupuesto y retoma el control! 🚀`,
-o1:v=>`¡Tienes <b>${v.libre}</b> libres! Aparta <b>${v.monto}</b> y acércate a “${v.meta}”. ¡Cada paso cuenta! 🎯`,
+o1:v=>`Tras reservar pagos, gasto previsto y colchón, podrías destinar <b>${v.monto}</b> a “${v.meta}”. No se contará como ahorro hasta que lo registres.`,
 o2:v=>`¡El ${v.dia} llegan <b>${v.monto}</b>! Cuando se registren, planeamos cuánto apartar para tus metas. 🌟`,
 o3:v=>`¡Estás a <b>${v.falta}</b> de lograr “${v.meta}”! Tienes lo necesario para cerrarla hoy. 🏆`,
 o3p:v=>`¡Ya casi! Te faltan <b>${v.falta}</b> para “${v.meta}”. Con <b>${v.dd}</b> al día llegas en ${v.nd} días. 🔥`,
@@ -605,13 +605,13 @@ ok:v=>`¡Todo en orden, ${v.n}! Tienes <b>${v.libre}</b> libres. ¡Sigue así! �
 repeat:v=>`¡Seguimos avanzando, ${v.n}! Tu disponible actual es <b>${v.libre}</b>. Revisa tus números antes de dar el siguiente paso. 🌟`},
 calmado:{
 p0:v=>`Hola, ${v.n}. Con calma, ve registrando tus movimientos. En unos días podré darte consejos con tus números reales.`,
-a1:v=>`Por ahora no queda dinero libre (<b>${v.libre}</b>). Puede ayudar dejar solo lo esencial hasta tu próximo ingreso.`,
+a1:v=>`Después de reservar los pagos fijos previstos, no queda dinero libre (<b>${v.libre}</b>). Deja solo lo esencial hasta tu próximo ingreso.`
 a2:v=>`Al ritmo actual faltarían <b>${v.falta}</b> antes de tu próximo ingreso. Podría ayudar mantener unos <b>${v.diario}</b> diarios.`,
 a3:v=>`Superaste tu presupuesto de <b>${v.cat}</b> por <b>${v.exc}</b> (${v.gas} de ${v.lim}). Se puede equilibrar con otras categorías.`,
 a3f:v=>`Llegaste al límite de tu presupuesto de <b>${v.cat}</b> (${v.gas} de ${v.lim}). Puedes ir con calma con los próximos gastos de esa categoría.`,
 a4:v=>`En <b>${v.cat}</b> llevas ${v.gas} de ${v.lim}. Quedan <b>${v.rest}</b> ${v.para}.`,
 a5:v=>`<b>${v.cat}</b> representa el ${v.pct}% de tus gastos variables (${v.monto}). Si quieres, puedes ponerle un presupuesto.`,
-o1:v=>`Hoy tienes <b>${v.libre}</b> libres. Si quieres, puedes apartar <b>${v.monto}</b> para “${v.meta}” sin tocar tu colchón.`,
+o1:v=>`Si los registros recientes son representativos, podrías destinar <b>${v.monto}</b> a “${v.meta}” tras reservar pagos, gastos previstos y colchón. No es ahorro registrado.`
 o2:v=>`El ${v.dia} está previsto un ingreso de <b>${v.monto}</b>. Cuando se registre, podremos ver cuánto apartar.`,
 o3:v=>`Para “${v.meta}” faltan <b>${v.falta}</b>, y hoy cuentas con lo necesario para completarla.`,
 o3p:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Si apartas <b>${v.dd}</b> al día, llegarías en unos ${v.nd} días, sin prisa.`,
@@ -677,7 +677,7 @@ const tv=sum1(c.vv.map(x=>x.amount)),cg={};c.vv.forEach(x=>{const k=x.category||
 const t5=Object.entries(cg).filter(([k,v])=>!pm.some(b=>b.category===k&&Number(b.amount)>0)&&v.n>=5&&tv>0&&v.t/tv>.4).sort((a,b)=>b[1].t-a[1].t)[0];
 if(t5)al.push(M('w','a5',{cat:e(t5[0]),pct:Math.round(t5[1].t/tv*100),monto:m(t5[1].t)},{l:'Crear presupuesto',f:()=>{openBudget();const s=$('budgetCategory');if(s&&[...s.options].some(x=>x.value===t5[0]))s.value=t5[0]}}));
 // ---- Oportunidades (prioridad 2) ----
-const op=[],liq=L<=0||(c.proy!=null&&c.proy>L),fl=x=>Math.round(x*100)/100,weeklyIncome=sum1(S.rec.filter(r=>r.type==='income'&&r.frequency==='weekly').map(r=>Number(r.amount)||0)),safeSurplus=c.gastable,saveWeekCap=safeSurplus;
+const op=[],liq=L<=0||(c.proy!=null&&c.proy>L),fl=x=>Math.round(x*100)/100,safeSurplus=c.gastable,saveWeekCap=safeSurplus;
 if(!liq){
 // O3: meta que se puede completar hoy sin tocar el colchón
 const c3=act.filter(x=>x.q<=safeSurplus&&x.q>0).sort((a,b)=>a.q-b.q)[0];
