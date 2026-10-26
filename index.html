@@ -575,6 +575,8 @@ a3f:v=>`<b>${v.cat}</b>: llegaste al límite de tu presupuesto (${v.gas} de ${v.
 a4:v=>`<b>${v.cat}</b>: ${v.gas} de ${v.lim}. Quedan <b>${v.rest}</b> ${v.para}.`,
 a5:v=>`<b>${v.cat}</b> es el ${v.pct}% de tus gastos variables (${v.monto}). ¿Le pones presupuesto?`,
 a6:v=>`<b>${v.cat}</b>: llevas <b>${v.gas}</b> de <b>${v.lim}</b>, pero solo ha transcurrido el ${v.elapsed}% del período. Revisa compras repetidas u opcionales antes de gastar más.`,
+a7:v=>`<b>${v.cat}</b>: ${v.actual} esta semana frente a ${v.prom} de promedio en semanas anteriores. Recorta ${v.recorte} en compras opcionales para proteger el presupuesto.`,
+a7:v=>`<b>${v.cat}</b>: llevas ${v.actual} esta semana; en semanas anteriores, para estos mismos días, promediabas ${v.prom}. Reduce ${v.recorte} en compras opcionales para mantener el presupuesto.`,
 o1:v=>`Tras reservar pagos, gasto previsto y colchón, podrías apartar <b>${v.monto}</b> para “${v.meta}”. Es una estimación, no ahorro registrado.`,
 o2:v=>`El ${v.dia} llegan <b>${v.monto}</b>. Se usarán en los cálculos cuando estén registrados.`,
 o3:v=>`Meta “${v.meta}”: faltan <b>${v.falta}</b>. Puedes completarla sin tocar el dinero reservado.`,
@@ -595,6 +597,7 @@ a3f:v=>`Llegaste justo al límite en <b>${v.cat}</b> (${v.gas} de ${v.lim}). Cui
 a4:v=>`¡Ojo, vas cerca del límite en <b>${v.cat}</b>! Llevas ${v.gas} de ${v.lim}; con los <b>${v.rest}</b> que quedan puedes cerrar bien el período. 🎯`,
 a5:v=>`<b>${v.cat}</b> se lleva el ${v.pct}% de tus gastos variables (${v.monto}). ¡Ponle un presupuesto y retoma el control! 🚀`,
 a6:v=>`¡Revisemos <b>${v.cat}</b>! Ya llevas <b>${v.gas}</b> de <b>${v.lim}</b> y el período va por el ${v.elapsed}%. Si algunas compras pueden esperar, pausarlas te ayudará a cuidar tu presupuesto. 🎯`,
+a7:v=>`En <b>${v.cat}</b> llevas ${v.actual} esta semana, más que tu promedio anterior de ${v.prom}. Si puedes, reduce ${v.recorte} en gastos opcionales. 🎯`,
 o1:v=>`Tras reservar pagos, gasto previsto y colchón, podrías destinar <b>${v.monto}</b> a “${v.meta}”. No se contará como ahorro hasta que lo registres.`,
 o2:v=>`¡El ${v.dia} llegan <b>${v.monto}</b>! Cuando se registren, planeamos cuánto apartar para tus metas. 🌟`,
 o3:v=>`¡Estás a <b>${v.falta}</b> de lograr “${v.meta}”! Tienes lo necesario para cerrarla hoy. 🏆`,
@@ -657,8 +660,11 @@ budgetReserve=(()=>{const bs=budgetData(),end=nx?nx.date:add(td,freq==='semanal'
 gastable=Math.max(0,Math.min(gastableBase,libre-budgetReserve-colchon)),
 prevStart=incD[1]&&incD[1]<start?incD[1]:add(start,freq==='semanal'?-7:-30),
 prevV=S.tx.filter(x=>x.type==='expense'&&!x.fixed&&x.date>=prevStart&&x.date<start),
-prevDaily=sum1(prevV.map(x=>Number(x.amount)||0))/Math.max(1,dd(prevStart,start));
-return{now,td,D,dd,add,freq,nx,dias,fijosP,pend,fd,start,vv,gd,disp,libre,colchon,proy,gastable,prevStart,prevV,prevDaily,usoDias:dataDays,periodMoves:S.tx.filter(x=>x.date>=start&&x.date<=td).length}}
+prevDaily=sum1(prevV.map(x=>Number(x.amount)||0))/Math.max(1,dd(prevStart,start)),
+// Compara cada categoría presupuestada con las mismas fechas de las tres semanas anteriores.
+weekStart=ymd(wk(now)),weekElapsed=Math.max(1,dd(weekStart,td)+1),
+weeklyCompare=cleanBudgets(S.budgets).map(b=>{const sum=(a,z)=>sum1(S.tx.filter(x=>x&&x.type==='expense'&&x.category===b.category&&x.date>=a&&x.date<=z).map(x=>Number(x.amount)||0)),current=sum(weekStart,td),history=[1,2,3].map(k=>{const a=add(weekStart,-7*k),z=add(a,weekElapsed-1);return sum(a,z)}),valid=history.filter((v,i)=>S.tx.some(x=>x&&x.type==='expense'&&x.category===b.category&&x.date>=add(weekStart,-7*(i+1))&&x.date<weekStart));return{category:b.category,current,average:valid.length?sum1(valid)/valid.length:null,weeks:valid.length,weekStart,weekElapsed,limit:Number(b.amount)||0,frequency:b.frequency==='weekly'?'weekly':'monthly'}}).filter(x=>x.weeks>=2&&x.average!==null&&x.current>=x.average*1.25&&x.current-x.average>=2).sort((a,b)=>(b.current-b.average)-(a.current-a.average));
+return{now,td,D,dd,add,freq,nx,dias,fijosP,pend,fd,start,vv,gd,disp,libre,colchon,proy,gastable,prevStart,prevV,prevDaily,weeklyCompare,weekStart,weekElapsed,usoDias:dataDays,periodMoves:S.tx.filter(x=>x.date>=start&&x.date<=td).length}}
 
 function tips(pl,i,o){const P=S.profile,st=CM[P.coach]||CM.cercano,nm=esc(dn(P)),Vo=P.coach==='cercano'&&P.gender==='mujer'?'Amiga':P.coach==='cercano'&&P.gender==='hombre'?'Amigo':nm,
 c=coachData(),A=[],out=[],e=esc,
@@ -684,6 +690,9 @@ if(wn)al.push(M('w','a4',{cat:e(wn.category),gas:m(wn.spent),lim:m(wn.limit),res
  const pace=BD.map(b=>{const total=Math.max(1,Math.round((new Date(b.periodEnd+'T00:00:00')-new Date(b.periodStart+'T00:00:00'))/86400000)+1),elapsed=Math.min(100,Math.round((Math.round((todayDate-new Date(b.periodStart+'T00:00:00'))/86400000)+1)/total*100)),count=S.tx.filter(x=>x&&x.type==='expense'&&x.category===b.category&&x.date>=b.periodStart&&x.date<=c.td).length;return{...b,elapsed,count}}).filter(b=>b.limit>0&&b.spent<b.limit&&b.count>=3&&b.pct>=35&&b.pct>=b.elapsed+20).sort((a,b)=>(b.pct-b.elapsed)-(a.pct-a.elapsed));
  const fast=pace[0];
  if(fast)al.push(M('w','a6',{cat:e(fast.category),gas:m(fast.spent),lim:m(fast.limit),elapsed:fast.elapsed},{l:'Revisar presupuesto',f:()=>go('budgets')}));
+// A7: compara el gasto de esta semana con el promedio de las mismas fechas de al menos dos semanas previas.
+const hist=c.weeklyCompare[0];
+if(hist)al.push(M('w','a7',{cat:e(hist.category),actual:m(hist.current),prom:m(hist.average),recorte:m(Math.min(hist.current-hist.average,Math.max(1,hist.current*.25)))},{l:'Ver presupuestos',f:()=>go('budgets')}));
 
 // A5: categoría con 5 o más movimientos y más del 40 % del gasto variable, sin presupuesto. No propone ningún tope: el monto lo elige la persona.
 const tv=sum1(c.vv.map(x=>x.amount)),cg={};c.vv.forEach(x=>{const k=x.category||'Otros gastos';(cg[k]=cg[k]||{t:0,n:0});cg[k].t+=x.amount;cg[k].n++});
