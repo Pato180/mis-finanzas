@@ -141,10 +141,3 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
-
-# Personal financial exports and backups (never commit real data)
-respaldo_mis_finanzas_*.json
-respaldo_cifrado_mis_finanzas_*.json
-*.xlsx
-estado_de_cuenta*.pdf
-libro_contable*.pdf
