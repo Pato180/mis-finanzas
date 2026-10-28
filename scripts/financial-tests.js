@@ -70,6 +70,7 @@ assert.equal(february.ini, 150, 'Febrero debe arrastrar el saldo final de enero.
 assert.equal(february.fin, 185, 'Un gasto pagado desde una meta no debe reducir el efectivo disponible.');
 assert.equal(february.act[0][1], 185, 'El efectivo disponible debe reflejar el saldo final.');
 assert.equal(february.act[1][1], 15, 'El ahorro disponible debe bajar al gastar desde una meta.');
+assert.equal(february.goals[0].saved, 15, 'El saldo disponible de la meta debe descontar los gastos vinculados a ella.');
 assert.equal(february.tA, 280, 'Los activos deben sumar efectivo, ahorros y activos registrados.');
 assert.equal(february.tP, 25);
 assert.equal(february.pn, 255);
@@ -82,7 +83,7 @@ assert.equal(march.fin, 185, 'Un mes sin movimientos debe conservar el saldo ant
 
 const all = history(true, '2026-01');
 assert.equal(all.ti, 150);
-assert.equal(all.te, 45);
+assert.equal(all.te, 50, 'El historial debe contabilizar también el gasto de la meta en la columna de egresos.');
 assert.equal(all.ta, 20);
 assert.equal(all.fin, 185, 'El historial completo debe coincidir con el saldo acumulado.');
 
