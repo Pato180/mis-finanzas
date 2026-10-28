@@ -673,7 +673,7 @@ c=coachData(),A=[],out=[],e=esc,
 // Un mensaje = clase de color + texto del estilo elegido + botón opcional (label + acción).
 M=(k,id,v,b)=>({k,id,t:st[id](Object.assign({n:nm,Vo,libre:m(c.libre)},v)),b}),
 // P0 solo cuando hay menos de cinco movimientos registrados en total; no penalizar un período mensual aún en curso.
-poco=c.periodMoves<5;
+poco=S.tx.length<5;
 if(poco)out.push(M('','p0',{}));
 else{
 const BD=budgetData(),pm=S.budgets,L=c.libre,cap=Math.max(0,L-c.colchon),
