@@ -461,7 +461,31 @@ pk=(id,t)=>'ahorroApp_p_'+id+'_'+t,setPid=id=>{PID=id;TB.forEach(t=>{K[t]=id?pk(
 newId=()=>'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,8),pinOk=s=>/^\d{4}$/.test(s),
 pinTaken=async(pin,ex)=>{const key='mf_pin_guess_v1',now=Date.now();let st={count:0,until:0,level:0};try{st={...st,...JSON.parse(localStorage.getItem(key)||'{}')}}catch(e){}if(now<st.until)return true;let taken=false;for(const p of regLoad()){if(p.id!==ex&&p.pin&&await verifyPin(pin,p.pin)){taken=true;break}}st.count=(Number(st.count)||0)+1;if(st.count>=5){const waits=[30000,120000,600000];st.until=now+waits[Math.min(Number(st.level)||0,2)];st.level=Math.min((Number(st.level)||0)+1,2);st.count=0}try{localStorage.setItem(key,JSON.stringify(st))}catch(e){}return taken},
 bioTaken=()=>regLoad().some(p=>p.bio&&p.id!==PID);
-function migrate(){if(regLoad().length)return;let P=null;try{P=JSON.parse(lsGet(LEG.profile))}catch(e){}if(!P)return;const id=newId();P.id=id;const entries=[];TB.forEach(t=>{const v=t==='profile'?JSON.stringify(P):LEG[t]?lsGet(LEG[t]):null;if(v!==null)entries.push({key:pk(id,t),value:v})});entries.push({key:PR_K,value:JSON.stringify([{id,name:P.username||'Perfil',pin:lsGet('ahorroApp_pin')||null,bio:lsGet('ahorroApp_bio')||null}])});if(!writeBatch(entries))return;TB.forEach(t=>{if(LEG[t])lsDel(LEG[t])});lsDel('ahorroApp_pin');lsDel('ahorroApp_bio')}
+function migrate(){
+  // Recuperación conservadora: nunca borrar las claves antiguas durante el arranque.
+  let reg=regLoad();
+  const known=new Set(reg.map(p=>p&&p.id).filter(Boolean));
+  // Si el índice de perfiles se perdió o quedó incompleto, reconstruirlo desde perfiles que aún existan.
+  try{
+    Object.keys(localStorage).filter(k=>k.startsWith('ahorroApp_p_')&&k.endsWith('_profile')).forEach(key=>{
+      const id=key.slice('ahorroApp_p_'.length,-'_profile'.length);
+      if(!id||known.has(id))return;
+      const profile=JSON.parse(localStorage.getItem(key)||'null');
+      if(!profile||typeof profile!=='object'||Array.isArray(profile))return;
+      reg.push({id,name:profile.username||'Perfil recuperado',pin:null,bio:null});
+      known.add(id);
+    });
+  }catch(e){}
+  if(reg.length && JSON.stringify(reg)!==JSON.stringify(regLoad())){if(regSave(reg))return}
+  if(regLoad().length)return;
+  let P=null;try{P=JSON.parse(lsGet(LEG.profile))}catch(e){}
+  if(!P||typeof P!=='object'||Array.isArray(P))return;
+  const id=newId();P.id=id;const entries=[];
+  TB.forEach(t=>{const v=t==='profile'?JSON.stringify(P):LEG[t]?lsGet(LEG[t]):null;if(v!==null)entries.push({key:pk(id,t),value:v})});
+  entries.push({key:PR_K,value:JSON.stringify([{id,name:P.username||'Perfil',pin:lsGet('ahorroApp_pin')||null,bio:lsGet('ahorroApp_bio')||null}])});
+  if(!writeBatch(entries))return;
+  // Importante: conservar el origen hasta verificar manualmente que el perfil abre y sus datos están completos.
+}
 // Datos del perfil activo: viven dentro de S.profile. El género solo adapta el trato (vocativo); nunca entra en cálculos ni consejos.
 const GE=['mujer','hombre','otro','no'],CS=['cercano','directo','motivador','calmado'],
 normP=P=>{P.id=P.id||'p'+Date.now();P.pref=P.pref||'';P.age=P.age||'';P.gender=GE.includes(P.gender)?P.gender:'no';P.colorTheme=['auto','original','blue','gray','red','brown','green','rose-millennial','rose-old','lavender','lilac','peach','nude'].includes(P.colorTheme)?P.colorTheme:'auto';P.coach=CS.includes(P.coach)?P.coach:'cercano';if(P.incomeFrequency&&!['semanal','mensual','irregular'].includes(P.incomeFrequency))P.incomeFrequency='irregular';return P},
@@ -879,8 +903,10 @@ async function bioUnlock(){try{const p=regLoad().find(x=>x.bio);if(!p)throw 0;aw
 function hideData(){if(typeof idleTimer!=='undefined'&&idleTimer)clearTimeout(idleTimer);idleTimer=null;PID=null;setPid(null);S.profile=null;S.tx=[];S.rec=[];S.goals=[];S.assets=[];S.liabs=[];S.cats=[];S.budgets=[];S.motifs=DM.slice();document.body.classList.add('locked');render0();['hi','bal','sIn','sOut','sSv'].forEach(i=>{const e=$(i);if(e)e.textContent=''});Object.values(CH).forEach(c=>{try{c.destroy()}catch(e){}});CH={}}
 function lock(){document.querySelectorAll('dialog[open]').forEach(d=>{if(d.id!=='dLk')d.close()});hideData();const r=regLoad();if(!r.length)return welcome();const np=r.find(p=>!p.pin);if(np)return needPin(np);
 $('lkP').value='';$('lkE').textContent='';$('lkPw').hidden=false;$('lkB').hidden=!r.some(p=>p.bio);if(!$('dLk').open)$('dLk').showModal();$('lkP').focus()}
-function enter(id){setPid(id);S.profile=ld(K.profile,null);S.tx=ld(K.tx,[]);S.rec=ld(K.rec,[]);S.goals=ld(K.goals,[]);S.motifs=ld(K.motifs,DM.slice());S.assets=ld(K.assets,[]);S.liabs=ld(K.liabs,[]);S.cats=ld(K.cats,[]);S.budgets=cleanBudgets(ld(K.budgets,[]));
-if(!S.profile)S.profile={username:(regFind(id)||{}).name||'Perfil',initialBalance:0,occ:'estudiante',salary:0};normP(S.profile);S.profile.id=id;migCat();
+function enter(id){setPid(id);S.profile=ld(K.profile,null);
+if(!S.profile){setPid(null);alert('No pude encontrar los datos base de este perfil. Para proteger tus registros, no voy a crear ni guardar un perfil vacío. La aplicación intentará recuperar el índice de perfiles al recargar.');lock();return}
+S.tx=ld(K.tx,[]);S.rec=ld(K.rec,[]);S.goals=ld(K.goals,[]);S.motifs=ld(K.motifs,DM.slice());S.assets=ld(K.assets,[]);S.liabs=ld(K.liabs,[]);S.cats=ld(K.cats,[]);S.budgets=cleanBudgets(ld(K.budgets,[]));
+normP(S.profile);S.profile.id=id;migCat();
 if($('dLk').open)$('dLk').close();document.body.classList.remove('locked');const h=document.querySelector('nav [data-go=home]');if(h)h.click();const before=snapshotState();autoPost();applyFixed();if(!save()){restoreState(before);render();return}render();resetIdle()}
 function startNew(){if($('dLk').open)$('dLk').close();hideData();['obN','obPn','obAg','obB','obG','obT','obS','obP','obP2','obPayDate'].forEach(x=>$(x).value='');document.querySelector('input[name="obHasGoal"][value="no"]').checked=true;document.querySelector('input[name="obHasBalance"][value="no"]').checked=true;$('obGoalFields').hidden=true;$('obBalanceFields').hidden=true;$('obBio').checked=false;$('obGe').value='no';$('obCs').value='cercano';$('obIf').value='irregular';$('obO').value='estudiante';$('obO').onchange();obShow(1);$('obCa').textContent=regLoad().length?'Cancelar':'Atrás';$('obCa').hidden=false;if(!$('dOb').open)$('dOb').showModal()}
 let npId=null;function needPin(p){npId=p.id;$('npT').textContent='Crea un PIN para «'+p.name+'»';$('npP').value=$('npP2').value='';if(!$('dNp').open)$('dNp').showModal()}
