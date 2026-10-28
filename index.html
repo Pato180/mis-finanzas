@@ -671,7 +671,7 @@ monthStart=td.slice(0,8)+'01',monthElapsed=Math.max(1,dd(monthStart,td)+1),month
 return{now,td,D,dd,add,freq,nx,dias,fijosP,pend,fd,start,vv,gd,disp,libre,colchon,proy,gastable,prevStart,prevV,prevDaily,weeklyCompare,monthlyCompare,weekStart,weekElapsed,usoDias:dataDays,periodMoves:S.tx.filter(x=>x.date>=start&&x.date<=td).length}}
 
 function tips(pl,i,o){const P=S.profile,st=CM[P.coach]||CM.cercano,nm=esc(dn(P)),Vo=P.coach==='cercano'&&P.gender==='mujer'?'Amiga':P.coach==='cercano'&&P.gender==='hombre'?'Amigo':nm,
-c=coachData(),A=[],e=esc,
+c=coachData(),A=[],e=esc;
 let out=[];
 // Un mensaje = clase de color + texto del estilo elegido + botón opcional (label + acción).
 M=(k,id,v,b)=>({k,id,t:st[id](Object.assign({n:nm,Vo,libre:m(c.libre)},v)),b}),
