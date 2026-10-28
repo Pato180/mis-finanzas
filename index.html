@@ -561,6 +561,7 @@ o3:v=>`¡Solo te faltan <b>${v.falta}</b> para “${v.meta}”! Ya tienes con qu
 o3p:v=>`Te faltan <b>${v.falta}</b> para “${v.meta}”. Guardando <b>${v.dd}</b> diarios (o <b>${v.sem}</b> por semana) llegas en ${v.nd} días. 😊`,
 o3n:v=>`Te faltan <b>${v.falta}</b> para “${v.meta}”. Con lo que tienes hoy aún no alcanza, pero con tu próximo ingreso sí. 😊`,
 o3m:v=>`Te faltan <b>${v.falta}</b> para “${v.meta}”. Con lo que tienes hoy aún no alcanza; vamos poquito a poquito. 😊`,
+o4:v=>`Según tus gastos y reservas, podrías ahorrar <b>${v.monto}</b> ${v.periodo}. Para repartirlo, separa aproximadamente <b>${v.diario}</b> al día durante ${v.dias} días. Si aparece un gasto esencial, recalcula antes de apartarlo.`,
 l1:v=>`Gastaste ${v.pct}% menos que el período pasado. ¡Eso se nota! 🎉`,
 l2:v=>`Cerraste <b>${v.cat}</b> con <b>${v.rest}</b> de sobra. ¡Bien jugado!`,
 l3:v=>`¡Lo lograste! “${v.meta}” está completa. 💖`,
@@ -583,6 +584,7 @@ o3:v=>`Meta “${v.meta}”: faltan <b>${v.falta}</b>. Puedes completarla sin to
 o3p:v=>`Meta “${v.meta}”: faltan <b>${v.falta}</b>. Aparta <b>${v.sem}</b> esta semana; objetivo estimado en ${v.nd} días.`,
 o3n:v=>`Meta “${v.meta}”: faltan <b>${v.falta}</b>. No la apartes todavía: primero cubre los gastos previstos hasta tu próximo ingreso.`,
 o3m:v=>`Meta “${v.meta}”: faltan <b>${v.falta}</b>. Aún no hay margen seguro para apartarlo.`,
+o4:v=>`Según tus gastos y reservas, podrías ahorrar <b>${v.monto}</b> ${v.periodo}. Para repartirlo, separa aproximadamente <b>${v.diario}</b> al día durante ${v.dias} días. Si aparece un gasto esencial, recalcula antes de apartarlo.`,
 l1:v=>`Gasto variable: ${v.pct}% menos que el período anterior.`,
 l2:v=>`<b>${v.cat}</b>: cerrado dentro del presupuesto, sobran <b>${v.rest}</b>.`,
 l3:v=>`Meta “${v.meta}” completada.`,
@@ -604,6 +606,7 @@ o3:v=>`¡Estás a <b>${v.falta}</b> de lograr “${v.meta}”! Tienes lo necesar
 o3p:v=>`¡Ya casi! Te faltan <b>${v.falta}</b> para “${v.meta}”. Con <b>${v.dd}</b> al día llegas en ${v.nd} días. 🔥`,
 o3n:v=>`¡Ya casi! Te faltan <b>${v.falta}</b> para “${v.meta}”. Hoy aún no alcanza, pero con tu próximo ingreso la completas. 🔥`,
 o3m:v=>`¡Ya casi! Te faltan <b>${v.falta}</b> para “${v.meta}”. Hoy aún no alcanza, pero cada aporte te acerca. 🔥`,
+o4:v=>`Según tus gastos y reservas, podrías ahorrar <b>${v.monto}</b> ${v.periodo}. Para repartirlo, separa aproximadamente <b>${v.diario}</b> al día durante ${v.dias} días. Si aparece un gasto esencial, recalcula antes de apartarlo.`,
 l1:v=>`¡Bajaste tu gasto ${v.pct}% frente al período pasado! ¡Sigue así! 🚀`,
 l2:v=>`¡Cerraste <b>${v.cat}</b> con <b>${v.rest}</b> de sobra! ¡Eso es tener el control! 🏅`,
 l3:v=>`¡Meta cumplida! “${v.meta}” está completa. ¡Lo lograste! 🏆`,
@@ -625,6 +628,7 @@ o3:v=>`Para “${v.meta}” faltan <b>${v.falta}</b>, y hoy cuentas con lo neces
 o3p:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Si apartas <b>${v.dd}</b> al día, llegarías en unos ${v.nd} días, sin prisa.`,
 o3n:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Hoy aún no alcanza, pero con tu próximo ingreso podrás completarla, sin prisa.`,
 o3m:v=>`Faltan <b>${v.falta}</b> para “${v.meta}”. Hoy aún no alcanza; puedes seguir apartando a tu ritmo.`,
+o4:v=>`Según tus gastos y reservas, podrías ahorrar <b>${v.monto}</b> ${v.periodo}. Para repartirlo, separa aproximadamente <b>${v.diario}</b> al día durante ${v.dias} días. Si aparece un gasto esencial, recalcula antes de apartarlo.`,
 l1:v=>`Este período gastaste ${v.pct}% menos que el anterior. Buen ritmo.`,
 l2:v=>`Cerraste <b>${v.cat}</b> dentro de tu presupuesto, con <b>${v.rest}</b> de sobra.`,
 l3:v=>`Completaste “${v.meta}”. Un logro que vale la pena reconocer.`,
@@ -673,7 +677,7 @@ c=coachData(),A=[],out=[],e=esc,
 // Un mensaje = clase de color + texto del estilo elegido + botón opcional (label + acción).
 M=(k,id,v,b)=>({k,id,t:st[id](Object.assign({n:nm,Vo,libre:m(c.libre)},v)),b}),
 // P0 solo cuando hay menos de cinco movimientos registrados en total; no penalizar un período mensual aún en curso.
-poco=c.periodMoves<5;
+poco=S.tx.length<5;
 if(poco)out.push(M('','p0',{}));
 else{
 const BD=budgetData(),pm=S.budgets,L=c.libre,cap=Math.max(0,L-c.colchon),
@@ -714,6 +718,11 @@ const n3=act.filter(x=>x.q>safeSurplus).sort((a,b)=>a.q-b.q)[0];
 if(n3){const mg=c.gd!=null&&c.dias!=null?safeSurplus/c.dias:0,nd=mg>0?Math.ceil(n3.q/mg):0,sem=Math.min(mg*7,saveWeekCap);
 if(mg>=.5&&nd<=90&&sem>=.5)op.push(M('g','o3p',{falta:m(n3.q),meta:e(n3.g.title),dd:m(mg),sem:m(sem),nd}));
 else op.push(M('g',c.pend>0&&c.pend+cap>=n3.q?'o3n':'o3m',{falta:m(n3.q),meta:e(n3.g.title)}))}}
+// O4: propuesta de ahorro general solo cuando hay datos suficientes y margen seguro, sin desplazar una recomendación de meta.
+if(!op.length&&!liq&&safeSurplus>=1&&c.gd!=null&&c.dias!=null){
+ const ahorro=Math.floor(safeSurplus*100)/100,planDias=c.freq==='semanal'?5:Math.max(1,Math.min(30,c.dias)),diario=Math.floor((ahorro/planDias)*100)/100;
+ if(ahorro>=1&&diario>0)op.push(M('g','o4',{monto:m(ahorro),diario:m(diario),dias:planDias,periodo:c.freq==='semanal'?'en este ciclo semanal':'en este ciclo mensual'}));
+}
 // O2: ingreso fijo por llegar (solo informativo, sin botón de apartar y sin contarlo como disponible)
 if(c.pend>0)op.push(M('g','o2',{dia:c.D(c.nx.date).toLocaleDateString('es-EC',{day:'numeric',month:'long'}),monto:m(c.pend)}));
 // ---- Logros (prioridad 3) ----
