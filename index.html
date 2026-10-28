@@ -656,7 +656,7 @@ colchon=gd!=null?gd*3:0,
 proy=gd!=null&&dias!=null?gd*Math.max(0,dias):null,
 // Estimación prudente disponible tras pagos, gasto variable previsto, presupuestos y un colchón de tres días.
 gastableBase=gd!=null&&dias!=null?Math.max(0,libre-proy-colchon):0,
-budgetReserve=(()=>{const bs=budgetData(),end=nx?nx.date:add(td,freq==='semanal'?7:30),leftDays=Math.max(0,dd(td,end)),monthDays=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),monthLeft=Math.max(1,dd(td,ymd(new Date(now.getFullYear(),now.getMonth()+1,0)))+1),weekLeft=Math.max(1,7-(now.getDay()+6)%7);return bs.reduce((sum,b)=>{const remaining=Math.max(0,b.limit-b.spent);if(b.frequency==='weekly')return sum+Math.min(remaining, b.limit*Math.min(leftDays,weekLeft)/7);return sum+Math.min(remaining,b.limit*Math.min(leftDays,monthLeft)/monthDays)},0)})(),
+budgetReserve=(()=>{const bs=budgetData(),end=nx?nx.date:add(td,freq==='mensual'?30:7),leftDays=Math.max(0,dd(td,end)),monthDays=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),monthLeft=Math.max(1,dd(td,ymd(new Date(now.getFullYear(),now.getMonth()+1,0)))+1),weekLeft=Math.max(1,7-(now.getDay()+6)%7);return bs.reduce((sum,b)=>{const remaining=Math.max(0,b.limit-b.spent);if(b.frequency==='weekly')return sum+Math.min(remaining, b.limit*Math.min(leftDays,weekLeft)/7);return sum+Math.min(remaining,b.limit*Math.min(leftDays,monthLeft)/monthDays)},0)})(),
 // No recomendar apartar dinero que el presupuesto y el gasto habitual podrían necesitar antes del próximo ingreso.
 // El presupuesto y la proyección cubren en parte los mismos gastos: se reserva el mayor de ambos, no se restan dos veces. El colchón se descuenta una sola vez.
 gastable=gd!=null&&dias!=null?Math.max(0,libre-Math.max(proy||0,budgetReserve)-colchon):0,
@@ -674,7 +674,7 @@ c=coachData(),A=[],out=[],e=esc,
 // Un mensaje = clase de color + texto del estilo elegido + botón opcional (label + acción).
 M=(k,id,v,b)=>({k,id,t:st[id](Object.assign({n:nm,Vo,libre:m(c.libre)},v)),b}),
 // P0 solo cuando hay menos de cinco movimientos registrados en total; no penalizar un período mensual aún en curso.
-poco=S.tx.filter(x=>x&&x.date&&x.date<=c.td).length<5;
+poco=c.periodMoves<5;
 if(poco)out.push(M('','p0',{}));
 else{
 const BD=budgetData(),pm=S.budgets,L=c.libre,cap=Math.max(0,L-c.colchon),
