@@ -143,7 +143,7 @@ const coachRequirements = [
   [/id=["']pfIf["']/, 'El perfil debe permitir editar la frecuencia de ingreso.'],
   [/incomeFrequency/, 'La frecuencia de ingreso debe guardarse en el perfil.'],
   [/id=["']coachIncome["']/, 'El Resumen debe mostrar por separado el ingreso previsto.'],
-  [/poco=S\.tx\.filter\(x=>x&&x\.date&&x\.date<=c\.td\)\.length<5/, 'El coach debe aplicar la prioridad de pocos movimientos al período actual.'],
+  [/poco=c\.periodMoves<5/, 'El coach debe aplicar la prioridad de pocos movimientos al período actual.'],
   [/MisFinanzasRecurrence\.upcomingOccurrences/, 'El coach debe calcular ingresos y gastos futuros desde las reglas recurrentes.'],
   [/86400000/, 'El coach debe evitar repetir mensajes en menos de 24 horas.'],
   [/repeat:v=>/, 'Cada estilo debe tener una variante alternativa para mensajes recientes.'],
