@@ -714,7 +714,7 @@ const c1=act.filter(x=>x.q>safeSurplus).sort((a,b)=>b.pr-a.pr)[0],mt=Math.floor(
 if(!c3&&c1&&mt>=1)op.push(M('g','o1',{libre:m(L),monto:m(mt),meta:e(c1.g.title)},{l:'Apartar '+m(mt),f:()=>openSave(c1.g.id,mt)}));
 // O3 (no alcanza hoy): meta cerca (70 % o más); el ritmo diario solo se muestra si cabe en lo que te sobra después de tu gasto habitual
 const n3=act.filter(x=>x.q>safeSurplus).sort((a,b)=>a.q-b.q)[0];
-if(n3){const mg=c.gd!=null&&c.dias!=null?safeSurplus/c.dias:0,nd=mg>0?Math.ceil(n3.q/mg):0,sem=Math.min(mg*7,saveWeekCap);
+if(n3){const mg=c.gd!=null&&c.dias!=null?safeSurplus/Math.max(1,c.dias):0,nd=mg>0?Math.ceil(n3.q/mg):0,sem=Math.min(mg*7,saveWeekCap);
 if(mg>=.5&&nd<=90&&sem>=.5)op.push(M('g','o3p',{falta:m(n3.q),meta:e(n3.g.title),dd:m(mg),sem:m(sem),nd}));
 else op.push(M('g',c.pend>0&&c.pend+cap>=n3.q?'o3n':'o3m',{falta:m(n3.q),meta:e(n3.g.title)}))}}
 // O2: ingreso fijo por llegar (solo informativo, sin botón de apartar y sin contarlo como disponible)

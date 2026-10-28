@@ -12,6 +12,14 @@ const histMatch = html.match(/function hist\(all,ym\)\{[\s\S]*?(?=\nasync functi
 assert.ok(reportMatch, 'No se encontró la función report(ym) en index.html.');
 assert.ok(histMatch, 'No se encontró la función hist(all, ym) en index.html.');
 
+
+const cmMatch = html.match(/const CM=(\{[\s\S]*?\});\s*\n\/\/ Cálculos base/);
+assert.ok(cmMatch, 'No se pudo extraer la configuración de mensajes del coach.');
+const coachMessages = new Function('return ' + cmMatch[1])();
+for (const style of ['cercano','directo','motivador','calmado']) {
+  assert.equal(typeof coachMessages[style]?.a7, 'function', 'El estilo ' + style + ' debe tener el mensaje a7.');
+  assert.equal(typeof coachMessages[style]?.repeat, 'function', 'El estilo ' + style + ' debe tener el mensaje repeat.');
+}
 const sum = (items, type) => items
   .filter(item => item.type === type)
   .reduce((total, item) => total + item.amount, 0);
@@ -112,6 +120,12 @@ assert.equal(normalized.data.tx[0].amount, 25.5, 'Los montos importados deben no
 assert.equal(normalized.data.profile.initialBalance, 100);
 assert.equal(normalized.data.profile.pin, undefined, 'El PIN nunca debe importarse desde el archivo.');
 assert.equal(normalized.data.budgets[0].amount, 50);
+
+
+const hostileIdBackup = { ...validBackup, tx: [{ ...validBackup.tx[0], id: 'a"onmouseover="x' }] };
+const safeIdResult = normalizeBackup(ymd, defaultMotifs, cleanBudgets, hostileIdBackup);
+assert.ok(safeIdResult.data, 'Un respaldo con ID manipulada debe normalizarse de forma segura.');
+assert.ok(!/["'<>]/.test(safeIdResult.data.tx[0].id), 'Los IDs importados no deben conservar caracteres de atributos HTML.');
 
 const malformedBackup = {
   ...validBackup,

@@ -77,7 +77,7 @@
       const month = +rule.start.slice(5, 7) - 1;
       const day = +rule.start.slice(8);
 
-      for (let k = 0; k < 400; k++) {
+      for (let k = 0; k < 2000; k++) {
         const date = rule.frequency === 'weekly'
           ? new Date(year, month, day + 7 * k)
           : new Date(year, month + k, Math.min(day, new Date(year, month + k + 1, 0).getDate()));
