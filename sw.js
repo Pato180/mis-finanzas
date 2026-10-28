@@ -1,10 +1,9 @@
-const CACHE_NAME = 'mis-finanzas-v17';
+const CACHE_NAME = 'mis-finanzas-v16';
 
 const FILES_TO_CACHE = [
   './',
   './index.html',
   './recurrence.js',
-  './crypto-vault.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png'
@@ -34,7 +33,7 @@ self.addEventListener('fetch', event => {
   const url = new URL(req.url);
 
   // La app: primero internet (siempre la última versión); sin conexión o si tarda más de 4 s, usa la copia guardada.
-  if (req.mode === 'navigate' || /\/(index\.html|recurrence\.js|crypto-vault\.js)$/.test(url.pathname)) {
+  if (req.mode === 'navigate' || url.pathname.endsWith('/index.html')) {
     event.respondWith(
       Promise.race([
         fetch(req),
@@ -43,12 +42,11 @@ self.addEventListener('fetch', event => {
         .then(res => {
           if (!res || !res.ok) throw new Error('Respuesta de red no válida');
           const copia = res.clone();
-          const clave = req.mode === 'navigate' || url.pathname.endsWith('/index.html') ? './index.html' : req;
-          caches.open(CACHE_NAME).then(cache => cache.put(clave, copia).catch(() => {}));
+          caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copia).catch(() => {}));
           return res;
         })
         .catch(() => caches.open(CACHE_NAME).then(cache =>
-          cache.match(req.mode === 'navigate' || url.pathname.endsWith('/index.html') ? './index.html' : req).then(hit => hit || cache.match('./index.html') || cache.match('./'))
+          cache.match('./index.html').then(hit => hit || cache.match('./'))
         ))
     );
     return;

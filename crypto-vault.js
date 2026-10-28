@@ -6,9 +6,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   const FORMAT = 'mis-finanzas-encrypted-backup';
   const VERSION = 1;
-  const ITERATIONS = 600000;
-  const MIN_ITERATIONS = 100000;
-  const MAX_ITERATIONS = 1000000;
+  const ITERATIONS = 310000;
   const AAD = new TextEncoder().encode('Mis Finanzas encrypted backup v1');
   const encoder = new TextEncoder();
   const decoder = new TextDecoder('utf-8', { fatal: true });
@@ -46,11 +44,11 @@
       throw new Error('La contraseña del respaldo debe tener al menos 10 caracteres.');
     }
   }
-  async function deriveKey(password, salt, usages, iterations = ITERATIONS) {
+  async function deriveKey(password, salt, usages) {
     const webcrypto = cryptoApi();
     const material = await webcrypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveKey']);
     return webcrypto.subtle.deriveKey(
-      { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
+      { name: 'PBKDF2', salt, iterations: ITERATIONS, hash: 'SHA-256' },
       material,
       { name: 'AES-GCM', length: 256 },
       false,
@@ -85,7 +83,7 @@
     if (!envelope || typeof envelope !== 'object' || Array.isArray(envelope) ||
         envelope.format !== FORMAT || envelope.version !== VERSION ||
         envelope.cipher !== 'AES-256-GCM' || envelope.kdf !== 'PBKDF2-SHA-256' ||
-        !Number.isInteger(envelope.iterations) || envelope.iterations < MIN_ITERATIONS || envelope.iterations > MAX_ITERATIONS) {
+        envelope.iterations !== ITERATIONS) {
       throw new Error('El archivo no es un respaldo cifrado compatible de Mis Finanzas.');
     }
     const salt = fromBase64(envelope.salt, 16);
@@ -94,7 +92,7 @@
     if (ciphertext.length < 16) throw new Error('El respaldo cifrado está incompleto o dañado.');
     try {
       const webcrypto = cryptoApi();
-      const key = await deriveKey(password, salt, ['decrypt'], envelope.iterations);
+      const key = await deriveKey(password, salt, ['decrypt']);
       const plaintext = await webcrypto.subtle.decrypt(
         { name: 'AES-GCM', iv, additionalData: AAD, tagLength: 128 },
         key,
