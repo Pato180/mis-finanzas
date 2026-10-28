@@ -22,14 +22,16 @@ function requireFile(relativePath) {
 
 const htmlPath = path.join(root, 'index.html');
 const recurrencePath = path.join(root, 'recurrence.js');
+const cryptoPath = path.join(root, 'crypto-vault.js');
 const swPath = path.join(root, 'sw.js');
 const manifestPath = path.join(root, 'manifest.webmanifest');
 
-if (!requireFile('index.html') || !requireFile('recurrence.js') || !requireFile('sw.js') || !requireFile('manifest.webmanifest')) {
+if (!requireFile('index.html') || !requireFile('recurrence.js') || !requireFile('sw.js') || !requireFile('manifest.webmanifest') || !requireFile('crypto-vault.js')) {
   process.exit(1);
 }
 
 const html = fs.readFileSync(htmlPath, 'utf8');
+if (!html.includes('<script src="./crypto-vault.js"></script>')) fail('index.html debe cargar crypto-vault.js.');
 let manifest;
 
 try {

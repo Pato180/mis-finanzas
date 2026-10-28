@@ -406,6 +406,7 @@ body[data-theme] nav .bubble i{
 <div class="bt"><button type="button" class="btn sec" data-x>Cancelar</button><button class="btn">Crear meta</button></div></form></dialog>
 
 <script src="./recurrence.js"></script>
+<script src="./crypto-vault.js"></script>
 <script>
 const $=i=>document.getElementById(i),p=n=>String(n).padStart(2,'0'),ymd=d=>d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()),hm=d=>p(d.getHours())+':'+p(d.getMinutes()),
 wk=d=>{d=new Date(d);d.setDate(d.getDate()-(d.getDay()+6)%7);return d},fmt=new Intl.NumberFormat('es-EC',{style:'currency',currency:'USD'}),m=n=>fmt.format(n),
@@ -539,7 +540,7 @@ function renderCoachIncome(){const el=$('coachIncome');if(!el)return;const c=coa
 function applyTheme(){const P=S.profile||{},pref=P.colorTheme||'auto',theme=pref==='auto'?(P.gender==='hombre'?'blue':'original'):pref;document.body.dataset.theme=theme;const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=theme==='blue'?'#DDEAF7':theme==='gray'?'#E5E9ED':theme==='red'?'#F4E1E6':theme==='brown'?'#EFE4D8':theme==='green'?'#E1EDE3':theme==='rose-millennial'?'#F5E2EB':theme==='rose-old'?'#F0E0E2':theme==='lavender'?'#EAE3F7':theme==='lilac'?'#EEE2F5':theme==='peach'?'#F8E5DA':theme==='nude'?'#EEE4DA':'#EDF2F0'}
 function applyTextSize(){const P=S.profile,age=Number(P&&P.age)||0,pref=P&&['auto','normal','grande','muy-grande'].includes(P.textSize)?P.textSize:'auto';let size=pref;if(pref==='auto')size=age>=70?'muy-grande':age>=60?'grande':age>=50?'grande':'normal';document.body.classList.toggle('age-readable-50',size==='grande');document.body.classList.toggle('age-readable-60',size==='grande'&&pref==='auto'&&age>=60&&age<70);document.body.classList.toggle('age-readable-70',size==='muy-grande')}
 function render(){applyTheme();applyTextSize();const P=S.profile,pl=S.tx.filter(x=>inP(x.date)),i=sum(pl,'income'),o=sum(pl,'expense');
-$('hi').textContent='Hola, '+dn(P);$('bal').textContent=m(bal());$('sIn').textContent=m(i);$('sOut').textContent=m(o);$('sSv').textContent=m(sum(S.tx,'save'));
+$('hi').textContent='Hola, '+dn(P);$('bal').textContent=m(bal());$('sIn').textContent=m(i);$('sOut').textContent=m(o);$('sSv').textContent=m(savedTotal(S.tx));
 renderCoachIncome();tips(pl,i,o);charts(pl);list();fixed();goals();renderBudgets();renderUpcoming()}
 const sum1=a=>a.reduce((x,y)=>x+y,0);
 // ===== Coach financiero. Sigue el documento "Reglas del coach financiero – Mis Finanzas".
@@ -555,6 +556,7 @@ a3f:v=>`Llegaste al límite de tu presupuesto de <b>${v.cat}</b> (${v.gas} de ${
 a4:v=>`Vas en <b>${v.gas}</b> de tus ${v.lim} en <b>${v.cat}</b>. Te quedan <b>${v.rest}</b> ${v.para}.`,
 a5:v=>`<b>${v.cat}</b> concentra el ${v.pct}% de tus gastos variables (${v.monto}). ¿Quieres ponerle un presupuesto?`,
 a6:v=>`Ojo con <b>${v.cat}</b>: ya gastaste <b>${v.gas}</b> de tu presupuesto de <b>${v.lim}</b>, y el período va por el ${v.elapsed}%. Como ya hiciste varias compras aquí, revisa cuáles son necesarias y pausa las opcionales para que el presupuesto te alcance. 💛`,
+a7:v=>`En <b>${v.cat}</b> llevas ${v.actual} ${v.periodo}; en ${v.periodoAnterior}, para este mismo tramo, promediabas ${v.prom}. Reduce ${v.recorte} en compras opcionales para mantener el presupuesto.`,
 o1:v=>`Tras reservar pagos, gasto previsto y colchón, podrías apartar <b>${v.monto}</b> para “${v.meta}”. Es una estimación, no un ahorro registrado. 🚀`,
 o2:v=>`El ${v.dia} te llegan <b>${v.monto}</b>. Cuando se registre, veremos cuánto apartar. 😉`,
 o3:v=>`¡Solo te faltan <b>${v.falta}</b> para “${v.meta}”! Ya tienes con qué completarla. 👑`,
@@ -664,12 +666,13 @@ prevV=S.tx.filter(x=>x.type==='expense'&&!x.fixed&&x.date>=prevStart&&x.date<sta
 prevDaily=sum1(prevV.map(x=>Number(x.amount)||0))/Math.max(1,dd(prevStart,start)),
 // Compara cada categoría presupuestada con las mismas fechas de las tres semanas anteriores.
 weekStart=ymd(wk(now)),weekElapsed=Math.max(1,dd(weekStart,td)+1),
-weeklyCompare=cleanBudgets(S.budgets).map(b=>{const sum=(a,z)=>sum1(S.tx.filter(x=>x&&x.type==='expense'&&x.category===b.category&&x.date>=a&&x.date<=z).map(x=>Number(x.amount)||0)),current=sum(weekStart,td),history=[1,2,3].map(k=>{const a=add(weekStart,-7*k),z=add(a,weekElapsed-1);return sum(a,z)}),valid=history.filter((v,i)=>S.tx.some(x=>x&&x.type==='expense'&&x.category===b.category&&x.date>=add(weekStart,-7*(i+1))&&x.date<=add(add(weekStart,-7*(i+1)),weekElapsed-1)));return{category:b.category,current,average:valid.length?sum1(valid)/valid.length:null,weeks:valid.length,weekStart,weekElapsed,limit:Number(b.amount)||0,frequency:b.frequency==='weekly'?'weekly':'monthly'}}).filter(x=>x.weeks>=2&&x.average!==null&&x.current>=x.average*1.25&&x.current-x.average>=2).sort((a,b)=>(b.current-b.average)-(a.current-a.average));
+weeklyCompare=cleanBudgets(S.budgets).map(b=>{const sum=(a,z)=>sum1(S.tx.filter(x=>x&&x.type==='expense'&&x.category===b.category&&x.date>=a&&x.date<=z).map(x=>Number(x.amount)||0)),current=sum(weekStart,td),history=[1,2,3].map(k=>{const a=add(weekStart,-7*k),z=add(a,weekElapsed-1);return sum(a,z)}),valid=history.filter((v,i)=>S.tx.some(x=>x&&x.type==='expense'&&x.category===b.category&&x.date>=add(weekStart,-7*(i+1))&&x.date<=add(add(weekStart,-7*(i+1)),weekElapsed-1)));return{category:b.category,current,average:valid.length?sum1(valid)/valid.length:null,weeks:valid.length,weekStart,weekElapsed,limit:Number(b.amount)||0,frequency:b.frequency==='weekly'?'weekly':'monthly'}}).filter(x=>x.weeks>=2&&x.average!==null&&x.current>=x.average*1.25&&x.current-x.average>=2).sort((a,b)=>(b.current-b.average)-(a.current-a.average)),
 monthStart=td.slice(0,8)+'01',monthElapsed=Math.max(1,dd(monthStart,td)+1),monthlyCompare=cleanBudgets(S.budgets).map(b=>{const sum=(a,z)=>sum1(S.tx.filter(x=>x&&x.type==='expense'&&x.category===b.category&&x.date>=a&&x.date<=z).map(x=>Number(x.amount)||0)),current=sum(monthStart,td),history=[1,2,3].map(k=>{const a=add(monthStart,-new Date(new Date(monthStart+'T00:00:00').getFullYear(),new Date(monthStart+'T00:00:00').getMonth(),0).getDate());const start=ymd(new Date(new Date(monthStart+'T00:00:00').getFullYear(),new Date(monthStart+'T00:00:00').getMonth()-k,1));const end=add(start,Math.min(monthElapsed,new Date(new Date(start+'T00:00:00').getFullYear(),new Date(start+'T00:00:00').getMonth()+1,0).getDate())-1);return sum(start,end)}),valid=history.filter((v,i)=>{const start=ymd(new Date(new Date(monthStart+'T00:00:00').getFullYear(),new Date(monthStart+'T00:00:00').getMonth()-(i+1),1));const end=add(start,Math.min(monthElapsed,new Date(new Date(start+'T00:00:00').getFullYear(),new Date(start+'T00:00:00').getMonth()+1,0).getDate())-1);return S.tx.some(x=>x&&x.type==='expense'&&x.category===b.category&&x.date>=start&&x.date<=end)});return{category:b.category,current,average:valid.length?sum1(valid)/valid.length:null,weeks:valid.length,weekStart:monthStart,weekElapsed:monthElapsed,limit:Number(b.amount)||0,frequency:b.frequency==='weekly'?'weekly':'monthly'}}).filter(x=>x.weeks>=2&&x.average!==null&&x.current>=x.average*1.25&&x.current-x.average>=2).sort((a,b)=>(b.current-b.average)-(a.current-a.average));
 return{now,td,D,dd,add,freq,nx,dias,fijosP,pend,fd,start,vv,gd,disp,libre,colchon,proy,gastable,prevStart,prevV,prevDaily,weeklyCompare,monthlyCompare,weekStart,weekElapsed,usoDias:dataDays,periodMoves:S.tx.filter(x=>x.date>=start&&x.date<=td).length}}
 
 function tips(pl,i,o){const P=S.profile,st=CM[P.coach]||CM.cercano,nm=esc(dn(P)),Vo=P.coach==='cercano'&&P.gender==='mujer'?'Amiga':P.coach==='cercano'&&P.gender==='hombre'?'Amigo':nm,
-c=coachData(),A=[],out=[],e=esc,
+c=coachData(),A=[],e=esc,
+let out=[];
 // Un mensaje = clase de color + texto del estilo elegido + botón opcional (label + acción).
 M=(k,id,v,b)=>({k,id,t:st[id](Object.assign({n:nm,Vo,libre:m(c.libre)},v)),b}),
 // P0 solo cuando hay menos de cinco movimientos registrados en total; no penalizar un período mensual aún en curso.
@@ -798,6 +801,7 @@ document.querySelector('#dTx .seg').onclick=e=>{if(e.target.dataset.t){autoCateg
 $('motC').onclick=e=>{if(e.target.tagName==='BUTTON'){$('txM').value=e.target.textContent;$('txM').dispatchEvent(new Event('input',{bubbles:true}))}};
 function txShowStep(n){n=Math.max(1,Math.min(3,n));$('txStep1').hidden=n!==1;$('txStep2').hidden=n!==2;$('txStep3').hidden=n!==3;document.querySelectorAll('[data-step-dot]').forEach(b=>b.classList.toggle('on',+b.dataset.stepDot===n));$('txBack').hidden=n===1;$('txCancel').hidden=n===3;$('txNext').hidden=n===3;$('txSave').hidden=n!==3;const f=$('txStep'+n).querySelector('input:not([type=hidden]),select');if(f)f.focus()}
 $('txSource').onchange=()=>refreshFundingGoals();$('txSourceGoal').onchange=()=>refreshFundingGoals();$('txNext').onclick=()=>{const n=[1,2,3].find(i=>!$('txStep'+i).hidden)||1;for(const f of [...$('txStep'+n).querySelectorAll('input,select')].filter(el=>!el.disabled&&el.willValidate)){if(!f.checkValidity()){f.reportValidity();return}}txShowStep(n+1)};$('txBack').onclick=()=>{const n=[1,2,3].find(i=>!$('txStep'+i).hidden)||1;txShowStep(n-1)};
+$('fTx').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();if(!$('txStep3').hidden)$('fTx').requestSubmit();else $('txNext').click();}});
 $('fTx').onsubmit=e=>{e.preventDefault();if($('txStep3').hidden){txShowStep(3);return}const before=budgetSnap(),d=$('txM').value.trim(),previous=eid?S.tx.find(t=>String(t.id)===String(eid)):null;if(eid&&!previous)return toast('No encontré este movimiento. Cierra el formulario y vuelve a abrirlo.');
 // Al editar, conservar el objeto completo y sobrescribir únicamente los campos del formulario.
 // Así se mantienen reason, rid (vínculo con recurrentes), fixed, goalId y futuros metadatos.
@@ -886,7 +890,7 @@ $('lkGo').onclick=unlock;$('lkP').oninput=()=>{if($('lkP').value.length===4)unlo
 $('lkF').onclick=()=>{const b=$('lkF');if(b.dataset.s!=='1'){b.dataset.s='1';b.textContent='Toca otra vez para borrar TODOS los perfiles';return}if(!removeAllProfiles()){$('lkE').textContent='No se pudieron borrar todos los perfiles. Los datos se restauraron cuando fue posible; inténtalo de nuevo.';b.dataset.s='';b.textContent='Borrar TODOS los perfiles';return}location.reload()};
 
 let hid=0,idleTimer=null;const IDLE_MS=5*60*1000,resetIdle=()=>{if(idleTimer)clearTimeout(idleTimer);idleTimer=null;if(PID&&!document.body.classList.contains('locked'))idleTimer=setTimeout(()=>{if(PID)lock()},IDLE_MS)};['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,resetIdle,{passive:true}));document.addEventListener('visibilitychange',()=>{if(document.hidden)hid=Date.now();else if(PID&&hid&&Date.now()-hid>60000)lock();else resetIdle()});
-document.querySelectorAll('dialog form').forEach(f=>{const b=f.querySelector('.bt .btn:not([type=button]):not(.sec)');if(!b||f.id==='fOb')return;b.type='button';
+document.querySelectorAll('dialog form').forEach(f=>{const b=f.querySelector('.bt .btn:not([type=button]):not(.sec)');if(!b||f.id==='fOb'||f.id==='fTx')return;b.type='button';
 const go_=()=>{if(!f.reportValidity())return;try{f.onsubmit({preventDefault(){}})}catch(e){alert('Error: '+e.message)}};b.onclick=go_;f.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();go_()}})});
 migrate();
 obShow(1);
@@ -927,13 +931,11 @@ function autoCategoryFromMotif(){
     if(autoCategoryApplied)setType(tt,OT[tt]);
     autoCategoryApplied=false;b.hidden=true;return;
   }
-  if($('txC').value!==g.category||$('txS').value!==g.sub){
-    setType(tt,g.category,g.sub);
-  }
-  autoCategoryApplied=true;
+  autoCategoryApplied=false;
   b.hidden=false;
   const source=remembered?'Motivo registrado antes':'Sugerencia automática';
-  b.innerHTML='<small>'+esc(source+': '+g.category+(g.sub?' › '+g.sub:''))+' · Puedes cambiarlo si hace falta.</small>';
+  b.innerHTML='<small>'+esc(source+': '+g.category+(g.sub?' › '+g.sub:''))+' · </small><button type="button" class="lnk" id="txSgOk">Usar sugerencia</button>';
+  $('txSgOk').onclick=()=>{setType(tt,g.category,g.sub);autoCategoryApplied=true;b.hidden=true;};
 }
 $('txM').addEventListener('input',autoCategoryFromMotif);
 
@@ -958,14 +960,15 @@ $('rsF').onchange=async e=>{const f=e.target.files[0];if(f)await importBackup(f)
 const AK=['Cuenta bancaria','Inversión','Bien (vehículo, inmueble…)','Otro activo'],LK=['Deuda','Préstamo','Tarjeta de crédito','Otra obligación'],CDN='https://cdnjs.cloudflare.com/ajax/libs/',
 nf=new Intl.NumberFormat('es-EC',{minimumFractionDigits:2,maximumFractionDigits:2}),
 loadJs=u=>new Promise((ok,no)=>{const e=document.createElement('script');e.crossOrigin='anonymous';e.src=u;e.onload=ok;e.onerror=no;document.head.appendChild(e)});
-function report(ym){const P=S.profile,st=ym+'-01',en=ym+'-31',r2=v=>Math.round(v*100)/100,net=l=>sum(l,'income')-sum(l,'expense')-sum(l,'save'),
+function report(ym){const P=S.profile,st=ym+'-01',en=ym+'-31',r2=v=>Math.round(v*100)/100,net=l=>sum(l,'income')-(sum(l,'expense')-l.filter(x=>x.type==='expense'&&x.fundingGoalId).reduce((a,x)=>a+(Number(x.amount)||0),0))-sum(l,'save'),
 pre=S.tx.filter(x=>x.date<st),mv=S.tx.filter(x=>x.date.slice(0,7)===ym).sort((a,b)=>a.date.localeCompare(b.date)),upto=S.tx.filter(x=>x.date<=en),ini=r2(P.initialBalance+net(pre));let s=ini;
-const rows=mv.map(x=>{s=r2(s+(x.type==='income'?x.amount:-x.amount));return{d:x.date,t:x.description||x.category||'',i:x.type==='income'?x.amount:0,e:x.type==='expense'?x.amount:0,a:x.type==='save'?x.amount:0,s}}),
-ti=r2(sum(mv,'income')),te=r2(sum(mv,'expense')),ta=r2(sum(mv,'save')),fin=r2(ini+ti-te-ta),
+const rows=mv.map(x=>{const delta=x.type==='income'?x.amount:x.type==='expense'?(x.fundingGoalId?0:-x.amount):-x.amount;s=r2(s+delta);return{d:x.date,t:x.description||x.category||'',i:x.type==='income'?x.amount:0,e:x.type==='expense'?x.amount:0,a:x.type==='save'?x.amount:0,s}}),
+ti=r2(sum(mv,'income')),te=r2(sum(mv,'expense')),tg=r2(mv.filter(x=>x.type==='expense'&&x.fundingGoalId).reduce((a,x)=>a+(Number(x.amount)||0),0)),ta=r2(sum(mv,'save')),fin=r2(ini+ti-(te-tg)-ta),
 cat=t=>{const o={};mv.filter(x=>x.type===t).forEach(x=>{const k=x.category||'Sin categoría',c=o[k]=o[k]||[0,0];c[0]++;c[1]=r2(c[1]+x.amount)});return Object.entries(o).map(([k,v])=>[k,v[0],v[1]])},
 sv=l=>r2(l.filter(x=>x.type==='save').reduce((a,x)=>a+x.amount,0)),
+savedTotal=l=>r2(sv(l)-l.filter(x=>x.type==='expense'&&x.fundingGoalId).reduce((a,x)=>a+(Number(x.amount)||0),0)),
 goals=S.goals.map(g=>{const sd=sv(upto.filter(x=>x.goalId===g.id));return{t:g.title,target:g.target,saved:sd,rest:r2(Math.max(0,g.target-sd)),pc:g.target>0?Math.min(100,Math.round(sd/g.target*100)):0,st:sd>=g.target?'Completada':sd>0?'En progreso':'Sin iniciar'}}),
-ids=S.goals.map(g=>g.id),free=sv(upto.filter(x=>!ids.includes(x.goalId))),svT=sv(upto),
+ids=S.goals.map(g=>g.id),free=sv(upto.filter(x=>!ids.includes(x.goalId))),svT=savedTotal(upto),
 act=[['Dinero disponible (efectivo y saldo)',fin],['Ahorros (metas y ahorro general)',svT]].concat(S.assets.map(x=>[x.name+' ('+x.kind+')',x.amount])),pas=S.liabs.map(x=>[x.name+' ('+x.kind+')',x.amount]),
 tA=r2(act.reduce((a,x)=>a+x[1],0)),tP=r2(pas.reduce((a,x)=>a+x[1],0));
 return{P,ym,label:new Date(+ym.slice(0,4),+ym.slice(5)-1,1).toLocaleDateString('es-EC',{month:'long',year:'numeric'}),ini,ti,te,ta,fin,vr:r2(fin-ini),rows,ci:cat('income'),ce:cat('expense'),goals,free,act,pas,tA,tP,pn:r2(tA-tP)}}
