@@ -3,6 +3,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { encryptBackup, decryptBackup } = require(path.join(__dirname, '..', 'crypto-vault.js'));
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 const reportMatch = html.match(/function report\(ym\)\{[\s\S]*?(?=\nconst fname=)/);
@@ -63,14 +64,15 @@ assert.equal(january.fin, 150);
 assert.equal(january.goals[0].saved, 20);
 assert.equal(january.goals[0].rest, 80);
 
+state.tx.push({ id: 't6', type: 'expense', amount: 5, description: 'Imprevisto', category: 'Otros gastos', fundingGoalId: 'g1', date: '2026-02-10' });
 const february = compareMonth('2026-02');
 assert.equal(february.ini, 150, 'Febrero debe arrastrar el saldo final de enero.');
-assert.equal(february.fin, 185);
+assert.equal(february.fin, 185, 'Un gasto pagado desde una meta no debe reducir el efectivo disponible.');
 assert.equal(february.act[0][1], 185, 'El efectivo disponible debe reflejar el saldo final.');
-assert.equal(february.act[1][1], 20, 'Los ahorros deben figurar por separado del efectivo disponible.');
-assert.equal(february.tA, 285, 'Los activos deben sumar efectivo, ahorros y activos registrados.');
+assert.equal(february.act[1][1], 15, 'El ahorro disponible debe bajar al gastar desde una meta.');
+assert.equal(february.tA, 280, 'Los activos deben sumar efectivo, ahorros y activos registrados.');
 assert.equal(february.tP, 25);
-assert.equal(february.pn, 260);
+assert.equal(february.pn, 255);
 
 const march = compareMonth('2026-03');
 assert.equal(march.ti, 0);
@@ -83,6 +85,8 @@ assert.equal(all.ti, 150);
 assert.equal(all.te, 45);
 assert.equal(all.ta, 20);
 assert.equal(all.fin, 185, 'El historial completo debe coincidir con el saldo acumulado.');
+
+(async()=>{const pw='contraseña-larga-123';const env=await encryptBackup('{"a":1}',pw);assert.equal(env.iterations,600000);assert.equal(await decryptBackup(env,pw),'{"a":1}');await assert.rejects(()=>decryptBackup(env,'otra-contraseña-123'));const bad={...env,ciphertext:env.ciphertext.slice(0,10)+(env.ciphertext[10]==='A'?'B':'A')+env.ciphertext.slice(11)};await assert.rejects(()=>decryptBackup(bad,pw));await assert.rejects(()=>encryptBackup('x','corta'));console.log('Pruebas de cifrado de respaldo superadas.');})().catch(e=>{console.error(e);process.exitCode=1});
 
 const backupMatch = html.match(/function normalizeBackupData\(d\)\{[\s\S]*?(?=\nconst backupProfile=)/);
 assert.ok(backupMatch, 'No se encontró normalizeBackupData(d) en index.html.');

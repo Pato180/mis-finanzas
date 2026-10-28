@@ -32,6 +32,9 @@ if (!requireFile('index.html') || !requireFile('recurrence.js') || !requireFile(
 
 const html = fs.readFileSync(htmlPath, 'utf8');
 if (!html.includes('<script src="./crypto-vault.js"></script>')) fail('index.html debe cargar crypto-vault.js.');
+if (!html.includes('MisFinanzasCrypto.encryptBackup(backupPayload(),pw)')) fail('El respaldo debe cifrarse antes de exportar.');
+if (!html.includes('await parseBackupText(rd.result)') || !html.includes('await parseBackupText(await f.text())')) fail('Las rutas de restauración deben admitir respaldos cifrados.');
+if (!fs.readFileSync(swPath, 'utf8').includes("'./crypto-vault.js'")) fail('El service worker debe precargar crypto-vault.js.');
 let manifest;
 
 try {
