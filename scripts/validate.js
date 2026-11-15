@@ -154,6 +154,19 @@ for (const [pattern, message] of coachRequirements) {
   if (!pattern.test(html)) fail(message);
 }
 
+const goalLifecycleRequirements = [
+  [/function savingsAvailable\\(\\)/, 'El resumen debe mostrar el ahorro realmente disponible, descontando los retiros de metas.'],
+  [/function goalDone\\(g\\)\\{return !!g\\.archived\\|\\|!!g\\.pendingRenewal\\|\\|\\(Number\\(g\\.target\\)>0&&goalBalance\\(g\\.id\\)>=Number\\(g\\.target\\)\\)\\}/, 'Una meta parcialmente utilizada debe volver a estar activa; una meta agotada debe esperar la decisión del usuario.'],
+  [/function syncGoalStates\\(\\)/, 'Los estados de las metas deben sincronizarse con el saldo disponible.'],
+  [/function openPendingGoalRenewal\\(\\)/, 'La app debe avisar cuando una meta cumplida llegue a saldo cero.'],
+  [/goalRenewAgain/, 'El usuario debe poder renovar una meta sin borrar su historial.'],
+  [/goalRenewFinish/, 'El usuario debe poder finalizar una meta y conservarla en el historial.'],
+  [/Math\\.round\\(balance\\/Math\\.max\\(1,Number\\(g\\.target\\)\\|\\|1\\)\\*100\\)/, 'El progreso visual debe calcularse con el saldo disponible, no con aportaciones históricas.'],
+];
+for (const [pattern, message] of goalLifecycleRequirements) {
+  if (!pattern.test(html)) fail(message);
+}
+
 const sw = fs.readFileSync(swPath, 'utf8');
 if (!/key\.startsWith\(['"]mis-finanzas-['"]\)\s*&&\s*key\s*!==\s*CACHE_NAME/.test(sw)) {
   fail('El service worker debe eliminar únicamente las cachés antiguas de Mis Finanzas, no las de otras aplicaciones.');
